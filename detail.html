@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle - Wiki KREATIVE</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="detail-page">
+    <!-- Header -->
+    <header class="header">
+        <a href="index.html" class="logo">
+            <span>KREATIVE</span>
+        </a>
+        <nav class="nav">
+            <a href="#" class="nav-item">Inicio</a>
+            <a href="#" class="nav-item">Nuestro equipo</a>
+            <a href="#" class="nav-item">Servicios</a>
+            <a href="#" class="nav-item">Proyectos</a>
+            <a href="index.html" class="nav-item active">Wiki</a>
+            <a href="#" class="nav-item">Contacto</a>
+        </nav>
+        <div class="user-profile">
+            <div class="user-icon">👤</div>
+            <span>example-user@example.com</span>
+        </div>
+    </header>
+
+    <!-- Back Button -->
+    <section class="back-section">
+        <a href="index.html" class="back-button">
+            <span>←</span>
+            Volver a la Wiki
+        </a>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Publication Header -->
+        <div class="publication-header">
+            <div class="publication-image" id="publicationImage">
+                <!-- Image will be loaded by JavaScript -->
+            </div>
+            <div class="publication-meta">
+                <div class="publication-category" id="publicationCategory">
+                    <!-- Category will be loaded by JavaScript -->
+                </div>
+                <div class="publication-date" id="publicationDate">
+                    <!-- Date will be loaded by JavaScript -->
+                </div>
+            </div>
+            <h1 class="publication-title" id="publicationTitle">
+                <!-- Title will be loaded by JavaScript -->
+            </h1>
+            <p class="publication-description" id="publicationDescription">
+                <!-- Description will be loaded by JavaScript -->
+            </p>
+        </div>
+
+        <!-- Publication Content -->
+        <div class="publication-content">
+            <div class="content-section">
+                <h2>Contenido Principal</h2>
+                <p>Este es el contenido detallado de la publicación. Aquí se incluiría toda la información relevante, explicaciones paso a paso, ejemplos de código, imágenes adicionales y cualquier otro material educativo relacionado con el tema.</p>
+                
+                <h3>Conceptos Clave</h3>
+                <ul>
+                    <li>Primer concepto importante a destacar</li>
+                    <li>Segundo punto relevante para el aprendizaje</li>
+                    <li>Tercer elemento fundamental del tema</li>
+                    <li>Cuarto aspecto a considerar en la implementación</li>
+                </ul>
+                
+                <p>Continuando con el desarrollo del tema, es importante mencionar que cada publicación puede contener múltiples secciones organizadas de manera lógica para facilitar el aprendizaje y la comprensión del contenido.</p>
+                
+                <h3>Ejemplos Prácticos</h3>
+                <p>En esta sección se incluirían ejemplos prácticos, código fuente, capturas de pantalla o cualquier otro material que ayude a ilustrar los conceptos explicados en la publicación.</p>
+            </div>
+        </div>
+
+        <!-- Tags Section -->
+        <div class="tags-section">
+            <h2 class="tags-title">Etiquetas</h2>
+            <div class="tags-container" id="tagsContainer">
+                <!-- Tags will be loaded by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Attachments Section -->
+        <div class="attachments-section" id="attachmentsSection" style="display: none;">
+            <h2 class="attachments-title">Archivos Adjuntos</h2>
+            <div class="attachment-item">
+                <div class="attachment-icon">📄</div>
+                <div class="attachment-info">
+                    <div class="attachment-name">Documento de referencia.pdf</div>
+                    <div class="attachment-size">2.5 MB</div>
+                </div>
+                <a href="#" class="download-btn">Descargar</a>
+            </div>
+            <div class="attachment-item">
+                <div class="attachment-icon">💾</div>
+                <div class="attachment-info">
+                    <div class="attachment-name">Código fuente.zip</div>
+                    <div class="attachment-size">1.2 MB</div>
+                </div>
+                <a href="#" class="download-btn">Descargar</a>
+            </div>
+        </div>
+
+        <!-- External Link Section -->
+        <div class="external-link" id="externalLinkSection" style="display: none;">
+            <h2 class="link-title">Enlaces Relacionados</h2>
+            <a href="#" class="link-item" id="externalLink">
+                <div class="link-icon">🔗</div>
+                <div class="link-info">
+                    <div class="link-name">Recurso externo</div>
+                    <div class="link-url" id="linkUrl"><!-- URL will be loaded by JavaScript --></div>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <script src="js/detail.js"></script>
+</body>
+</html>
