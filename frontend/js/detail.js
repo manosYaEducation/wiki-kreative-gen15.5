@@ -118,3 +118,39 @@ function loadPublicationDetails() {
 document.addEventListener('DOMContentLoaded', function() {
     loadPublicationDetails();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Check for saved theme preference or default to light mode
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.toggle('dark-mode', currentTheme === 'dark');
+
+    // Update logo based on initial theme
+    const logo = document.querySelector('.icon');
+    if (logo) {
+        logo.src = currentTheme === 'dark' ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
+    }
+
+    // Update theme toggle button text based on initial theme
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    });
+});
+
+// Theme toggle function
+function toggleTheme() {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+    
+    // Update logo based on theme
+    const logo = document.querySelector('.icon');
+    if (logo) {
+        logo.src = isDarkMode ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
+    }
+
+    // Update theme toggle button text
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.textContent = isDarkMode ? '☀️' : '🌙';
+    });
+
+    // Save theme preference
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+}

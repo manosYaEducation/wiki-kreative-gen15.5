@@ -1,0 +1,819 @@
+/* Estilos para las filas de reseñas */
+.review-row {
+    transition: all 0.3s ease;
+    position: relative;
+    margin-bottom: 5px; /* Espacio entre filas normales */
+}
+
+/* Separador visual cada 3 reseñas */
+.review-separator {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.review-separator::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 15px 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -10px;
+}
+
+/* Estilo para hover */
+.review-row:hover {
+    background-color: #f9f9f9;
+}
+
+
+.create-profile {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: orange;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+    width: fit-content;
+    text-align: center;
+}
+
+.create-profile:hover {
+    background-color: rgb(138, 90, 2);
+}
+
+.buttonActualizar {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 4px;
+    color: #fff;
+    text-decoration: none;
+    margin: 5px 0;
+}
+
+.buttonActualizar {
+    background-color: #24de33;
+    margin-right: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+body {
+    font-family: poppins, sans-serif;
+    width: 100%;
+    min-width: 100%;
+    overflow-x: hidden;
+    margin: 0 auto;
+    height: auto;
+    background-color: #f1efef;
+}
+
+header {
+    color: white;
+    padding: 10px 20px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    background-color: white;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    max-width: 1000px;
+    width: 100%;
+    justify-content: space-between;
+    position: relative;
+    padding: 1rem 2rem;
+}
+
+/* Estilos para el botón hamburguesa */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 5px;
+    z-index: 1000;
+}
+
+.hamburger span {
+    width: 25px;
+    height: 3px;
+    background-color: #314438;
+    margin: 3px 0;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+/* Animación del botón hamburguesa cuando está activo */
+.hamburger.active span:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    width: 110px;
+    height: auto;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+}
+
+.headernav {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.headernav li {
+    margin-left: 20px;
+}
+
+.headernav li a.button-53 {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    color: #314438;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.headernav li a.button-53:hover {
+    background-color: hsl(142, 16%, 23%);
+    color: white;
+}
+
+.profiles-column {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.back-to-site {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    color: #314438;
+    text-decoration: none;
+    font-weight: 500;
+    margin-right: 20px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.back-to-site:hover {
+    background-color: #f0f0f0;
+    color: #4CAF50;
+}
+
+.back-to-site i {
+    margin-right: 8px;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    width: 280px;
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+}
+
+.profile-image {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #f0f0f0;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-content h2 {
+    color: #333;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.profile-subtitle {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    word-wrap: break-word;
+}
+
+.button-link {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: #05310b;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.button-link:hover {
+    background-color: #357abd;
+}
+
+.buttonActualizar {
+    background-color: #2ecc71;
+    padding: 8px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.buttonActualizar:hover {
+    background-color: #27ae60;
+}
+
+.buttonBorrar {
+    background-color: #e74c3c;
+    padding: 8px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.buttonBorrar:hover {
+    background-color: #c0392b;
+}
+
+.info-container {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.info-title {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+.reviews-section {
+    padding: 50px;
+}
+
+h4 {
+    text-align: center;
+}
+
+select {
+    align-items: center;
+    margin-left: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 120px;
+}
+
+.confirmButton {
+    padding: 8px 16px;
+    border-radius: 4px;
+    color: #fff;
+    background-color: #2ecc71;
+    margin-right: 10px;
+    border: none;
+}
+
+.cancelButton {
+    padding: 8px 16px;
+    border-radius: 4px;
+    color: #fff;
+    background-color: #e74c3c;
+    border: none;
+}
+
+table {
+    margin: 0 auto;
+    border-collapse: collapse;
+    background: white;
+    margin-bottom: 150px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+th {
+    padding: 10px;
+    width: 1px;
+    border: 1px solid #ddd;
+    font-weight: bold;
+}
+
+.td-large {
+    width: 800px;
+    overflow-wrap: break-word;
+    max-width: 800px;
+}
+
+.td-medium {
+    width: 245px;
+}
+
+.td-small {
+    width: 4px;
+}
+
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.rating {
+    width: 15px;
+    height: 15px;
+}
+
+.modal {
+    padding: 50px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.modal::backdrop {
+    background: #00000066;
+}
+
+
+
+.enlaces {
+    display: flex;
+    justify-content: center;
+    padding: 15px 0;
+    width: 100%;
+}
+
+.link-buttons {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+    gap: 0;
+    width: 100%;
+}
+
+.link-buttons li {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    border-right: 1px solid #e0e0e0;
+}
+
+.link-buttons li:last-child {
+    border-right: none;
+}
+
+.link-buttons li a.button-social {
+    text-decoration: none;
+    padding: 10px 0px 10px 0px;
+    border-radius: 0;
+    transition: all 0.3s ease;
+    color: #314438;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: normal;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #ffffff;
+    box-shadow: none;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.link-buttons li a.button-social:hover {
+    background-color: #4CAF50;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+
+    .review-row {
+        margin-bottom: 15px;
+        border: 1px solid #0000003a;
+        border-radius: 5px;
+        padding: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        background-color: #ffffff;
+    }
+    
+    
+
+    header {
+        padding: 5px;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    nav {
+        width: 100%;
+        max-width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        box-sizing: border-box;
+    }
+    
+
+    .headernav {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        justify-content: flex-start;
+    }
+
+    .headernav li {
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+    
+    .headernav li a.button-53 {
+        display: flex;
+        width: 100%;
+        text-align: center;
+        padding: 12px 15px;
+        color: #314438;
+        background-color: transparent;
+        border: 2px solid #314438;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 45px;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    
+    .headernav li a.button-53:hover {
+        background-color: #314438;
+        color: white;
+        border-color: #314438;
+    }
+
+    .profiles-section, .clientes-section, .reviews-section, .ambientes-section {
+        padding: 15px;
+        
+    }
+
+    .profile-card {
+        width: 100%;
+        height: auto;
+        margin: 10px 0;
+        max-width: 300px;
+        padding: 1rem 0.5rem;
+    }
+
+    .review-section,  .ambientes-section {
+        padding: 10px;
+    }
+
+    .review-card {
+        width: 100%;
+        height: auto;
+        margin: 10px 0;
+    }
+
+    .info-title, .info-subtitle {
+        font-size: 1.5em;
+        text-align: center;
+    }
+
+    .button-link, .buttonBorrar {
+        padding: 6px 26px;
+        font-size: 0.9em;
+    }
+
+    .create-profile {
+        padding: 12px 24px;
+        width: 90%;
+        font-size: 1.1em;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: white;
+        padding: 0.5rem;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 999;
+        display: none;
+        box-sizing: border-box;
+        justify-content: flex-start;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .navbar.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+        display: flex;
+    }
+    
+
+    
+    .hamburger {
+        display: flex;
+        margin-left: auto;
+        padding: 8px;
+        flex-shrink: 0;
+    }
+    
+    .hamburger span {
+        width: 20px;
+        height: 2px;
+        background-color: #314438;
+        margin: 2px 0;
+        transition: 0.3s;
+        border-radius: 1px;
+    }
+
+    .nav-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+    
+    .back-to-site {
+        margin-bottom: 0;
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    
+    .icon {
+        margin-left: 0;
+        width: 80px;
+        height: auto;
+    }
+
+
+
+    .profiles-column {
+        padding: 1rem;
+        gap: 1.5rem;
+    }
+
+    .client-content {
+        text-align: center;
+    }
+    
+    
+    table, thead, tbody{
+        background-color: #f1efef;
+    }
+    
+    /* Estilos responsive para la sección de enlaces en móviles */
+    .enlaces {
+        padding: 10px 0;
+        width: 100%;
+    }
+    
+    .link-buttons {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: stretch;
+        gap: 2px;
+        width: 100%;
+    }
+    
+    .link-buttons li {
+        flex: none;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 2px;
+    }
+    
+    .link-buttons li:last-child {
+        border-bottom: none;
+    }
+    
+    .link-buttons li a.button-social {
+        width: 100%;
+        justify-content: center;
+        
+        font-size: 0.8rem;
+        border: none;
+        background-color: #ffffff;
+        box-shadow: none;
+        border-radius: 0;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.1;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        min-height: 40px;
+    }
+    
+    .link-buttons li a.button-social:hover {
+        background-color: #4CAF50;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    table, thead, tbody, th, td, tr {
+        display: block;
+        min-width: 70%;
+    }
+    
+
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        padding: 10px;
+    }
+
+    td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 30%;
+        text-align: left;
+        font-size: 12px;
+        
+    }
+
+    td:before {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        overflow-wrap: break-word;
+    }
+
+    td:nth-of-type(1):before { content: "Cliente:"; }
+    td:nth-of-type(2):before { content: "Desarrollador:"; }
+    td:nth-of-type(3):before { content: "Empresa:"; }
+    td:nth-of-type(4):before { content: "Comentario:"; }
+    td:nth-of-type(5):before { content: "Valoración:"; }
+    td:nth-of-type(6):before { content: "Estado:"; }
+    td:nth-of-type(7):before { content: "Acciones:"; }
+
+    .td-large, .td-medium, .td-small {
+        width: 60%;
+        max-width: none;
+        overflow-wrap: break-word;
+        margin-bottom: 10px;
+
+    }
+
+    #filter-reviews {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .modal {
+        width: 90%;
+        max-width: none;
+        padding: 20px;
+    }
+
+
+    .confirmButton, .cancelButton {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    section {
+        margin-bottom: 30px;
+    }
+
+    .info-container {
+        margin-bottom: 30px;
+    }
+}
+
+/* Estilos para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 0.25rem;
+    }
+    
+    .headernav li {
+        max-width: 100%;
+        padding: 0 5px;
+    }
+    
+    .headernav li a.button-53 {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        min-height: 40px;
+    }
+    
+    .headernav {
+        gap: 8px;
+    }
+}
+
+/* Estilos para pantallas medianas y grandes */
+@media (min-width: 768px) {
+    .link-buttons li a.button-social {
+        padding: 10px 0px 10px 0px;
+        font-size: 0.8rem;
+        gap: 6px;
+    }
+}
+
+/* Estilos para pantallas grandes */
+@media (min-width: 1024px) {
+    .link-buttons li a.button-social {
+        padding: 10px 0px 10px 0px;
+        font-size: 0.85rem;
+        gap: 8px;
+    }
+}
+
+
