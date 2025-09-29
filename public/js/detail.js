@@ -66,7 +66,7 @@ function loadPublicationDetails() {
     
     if (!publicationId) {
         console.error('No publication ID provided in URL');
-        window.location.href = 'index.html';
+        window.location.href = 'index';
         return;
     }
 
@@ -74,7 +74,7 @@ function loadPublicationDetails() {
     
     if (!publication) {
         console.error(`Publication with ID ${publicationId} not found`);
-        window.location.href = 'index.html';
+        window.location.href = 'index';
         return;
     }
 

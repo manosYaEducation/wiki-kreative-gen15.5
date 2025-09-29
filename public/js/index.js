@@ -191,7 +191,7 @@ function createPublicationCard(pub) {
                     ${pub.tags.slice(0, 2).map(tag => `<span class="card-tag">${tag}</span>`).join('')}
                     ${pub.tags.length > 2 ? `<span class="card-tag">+${pub.tags.length - 2}</span>` : ''}
                 </div>
-                <a href="detail.html?id=${pub.id}" class="view-more-button">Ver más</a>
+                <a href="detail?id=${pub.id}" class="view-more-button">Ver más</a>
             </div>
         </div>
     `;

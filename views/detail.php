@@ -6,8 +6,8 @@
     <title>Admin Equipo Profesional Gen10 Alpha Docere</title>
     <link rel="icon" href="../assets/img/letra-k (1).png" type="image/x-icon">
     <link href="../frontend/css/admin/index-admin.css" rel="stylesheet" />
-    <link rel="stylesheet" href="../frontend/css/admin/cliente.css">
-	<link rel="stylesheet" href="css/wiki-kreative/wiki-kreative.css">
+    <link rel="stylesheet" href="public/css/admin/index-admin.css">
+	<link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" href="./assets/img/letra-k (1).png" type="image/x-icon">
@@ -21,7 +21,7 @@
     <header class="header">
         <nav>
             <div class="nav-left">
-            <a href="index.html" class="back-to-site">
+            <a href="index" class="back-to-site">
 			    <i class="fas fa-arrow-left"></i> Volver a la Wiki
             </a>
                 <img src="../assets/img/kreativenofondo.png" alt="Icono" class="icon">
@@ -142,6 +142,6 @@
         </div>
     </main>
 
-    <script src="js/detail.js"></script>
+	<script src="public/js/detail.js"></script>
 </body>
 </html>
