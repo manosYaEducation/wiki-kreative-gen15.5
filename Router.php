@@ -36,11 +36,6 @@ class Router
             // For 'project' route, $projectId and $dashboardSlug are expected
             $viewPath = $this->routes[$route];
 
-            // These variables will be available in the included view file
-            $slug = $_GET['slug'] ?? null;
-            $projectId = $_GET['id'] ?? null;
-            $dashboardSlug = $_GET['dashboardSlug'] ?? null;
-
             require_once $viewPath;
             return;
         }
