@@ -1,3 +1,4 @@
+const API_BASE_URL = '/wiki-kreative-gen15.5/backend/public';
 let currentPage = 1;
 let currentFilter = 'todas';
 let currentSearchTerm = '';
@@ -5,127 +6,78 @@ let currentTagFilter = '';
 let editingPublicationId = null;
 const itemsPerPage = 9;
 
-// Sample publications data
-let publications = [
-    {
-        id: 1,
-        title: "Introducción a React Hooks",
-        description: "Aprende los conceptos básicos de React Hooks y cómo utilizarlos en tus proyectos.",
-        category: "programacion",
-        tags: ["React", "JavaScript", "Frontend", "Hooks"],
-        image: "💻",
-        link: "https://example.com",
-        file: null
-    },
-    {
-        id: 2,
-        title: "Diseño de Interfaces Modernas",
-        description: "Principios fundamentales del diseño UI/UX para crear interfaces atractivas y funcionales.",
-        category: "diseño",
-        tags: ["UI", "UX", "Diseño", "Figma"],
-        image: "🎨",
-        link: null,
-        file: null
-    },
-    {
-        id: 3,
-        title: "Receta de Pasta Italiana",
-        description: "Una deliciosa receta tradicional italiana paso a paso para preparar en casa.",
-        category: "gastronomia",
-        tags: ["Cocina", "Italia", "Pasta", "Receta"],
-        image: "🍝",
-        link: null,
-        file: null
-    },
-    {
-        id: 4,
-        title: "Tutorial de Git y GitHub",
-        description: "Guía completa para dominar el control de versiones con Git y colaborar en GitHub.",
-        category: "tutorial",
-        tags: ["Git", "GitHub", "Control de versiones", "Desarrollo"],
-        image: "📚",
-        link: "https://github.com",
-        file: null
-    },
-    {
-        id: 5,
-        title: "Estrategias de Marketing Digital",
-        description: "Técnicas efectivas para promocionar tu negocio en el mundo digital actual.",
-        category: "marketing",
-        tags: ["Marketing", "Digital", "SEO", "Redes sociales"],
-        image: "📈",
-        link: null,
-        file: null
-    },
-    {
-        id: 6,
-        title: "Desarrollo con Node.js",
-        description: "Construye aplicaciones backend robustas utilizando Node.js y Express.",
-        category: "programacion",
-        tags: ["Node.js", "Backend", "JavaScript", "Express"],
-        image: "⚡",
-        link: null,
-        file: null
-    },
-    {
-        id: 7,
-        title: "Principios de Tipografía",
-        description: "Cómo elegir y combinar fuentes para crear diseños visualmente atractivos.",
-        category: "diseño",
-        tags: ["Tipografía", "Fuentes", "Diseño gráfico"],
-        image: "✍️",
-        link: null,
-        file: null
-    },
-    {
-        id: 8,
-        title: "Cocina Vegana Saludable",
-        description: "Recetas nutritivas y deliciosas para una alimentación vegana equilibrada.",
-        category: "gastronomia",
-        tags: ["Vegano", "Saludable", "Nutrición", "Recetas"],
-        image: "🥗",
-        link: null,
-        file: null
-    },
-    {
-        id: 9,
-        title: "CSS Grid y Flexbox",
-        description: "Domina los sistemas de layout modernos de CSS para crear diseños responsivos.",
-        category: "tutorial",
-        tags: ["CSS", "Grid", "Flexbox", "Layout"],
-        image: "🎯",
-        link: null,
-        file: null
-    },
-    {
-        id: 10,
-        title: "Branding Personal",
-        description: "Construye una marca personal sólida en el mundo profesional y digital.",
-        category: "marketing",
-        tags: ["Branding", "Personal", "Profesional", "Identidad"],
-        image: "🎭",
-        link: null,
-        file: null
+
+// Utility function for API calls
+async function makeApiCall(url, method = 'GET', body = null, includeFiles = false) {
+    const headers = {
+        'Accept': 'application/json',
+    };
+    const options = { method, headers };
+    
+    if (body) {
+        if (includeFiles) {
+            options.body = body; // FormData for file uploads
+        } else {
+            headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(body);
+        }
     }
-];
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${url}`, options);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || `Error del servidor: ${response.status}`);
+        }
+        return data;
+    } catch (error) {
+        showError(error.message);
+        throw error;
+    }
+}
+
+// Fetch all publications
+async function fetchPublications() {
+    try {
+        publications = await makeApiCall('tutorial/getAll');
+        publications = publications.map(pub => ({
+            ...pub,
+            tags: Array.isArray(pub.tags) ? pub.tags : (pub.tags ? JSON.parse(pub.tags) : [])
+        }));
+        renderPublications();
+        updateTagsSection();
+    } catch (error) {
+        console.error('Error fetching publications:', error);
+        showError('Error al cargar las publicaciones');
+    }
+}
+
 
 // Initialize page
-document.addEventListener('DOMContentLoaded', function() {
-    renderPublications();
-    updateTagsSection();
+document.addEventListener('DOMContentLoaded', async function() {
+    // Theme handling
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.toggle('dark-mode', currentTheme === 'dark');
+    const logo = document.querySelector('.icon');
+    if (logo) {
+        logo.src = currentTheme === 'dark' ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
+    }
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    });
+
+    await fetchPublications();
     setupEventListeners();
 });
 
 // Setup event listeners
 function setupEventListeners() {
-    // Search on Enter key
     document.getElementById('searchInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             performSearch();
         }
     });
 
-    // Close modals when clicking outside
     window.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal')) {
             closeUploadModal();
@@ -133,7 +85,6 @@ function setupEventListeners() {
         }
     });
 
-    // Close dropdowns when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.card-dropdown')) {
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -142,11 +93,8 @@ function setupEventListeners() {
         }
     });
 
-    // Tag input functionality for upload modal
     setupTagInput('upload');
     setupTagInput('edit');
-
-    // Image upload functionality
     setupImageUpload('upload');
     setupImageUpload('edit');
 }
@@ -157,15 +105,12 @@ function renderPublications() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const pagePublications = filteredPublications.slice(startIndex, endIndex);
-
     const cardGrid = document.getElementById('cardGrid');
     cardGrid.innerHTML = '';
-
     pagePublications.forEach(pub => {
         const card = createPublicationCard(pub);
         cardGrid.appendChild(card);
     });
-
     updatePagination(filteredPublications.length);
 }
 
@@ -173,6 +118,8 @@ function renderPublications() {
 function createPublicationCard(pub) {
     const card = document.createElement('div');
     card.className = 'card';
+    // Ensure tags is an array, default to empty array if null or undefined
+    const tags = Array.isArray(pub.tags) ? pub.tags : [];
     card.innerHTML = `
         <div class="card-dropdown">
             <button class="dropdown-button" onclick="toggleDropdown(event, ${pub.id})">⋮</button>
@@ -181,15 +128,15 @@ function createPublicationCard(pub) {
                 <div class="dropdown-item delete" onclick="deletePublication(${pub.id})">🗑️ Eliminar</div>
             </div>
         </div>
-        <div class="card-image">${pub.image}</div>
+        <div class="card-image"><img src="${pub.image || '/path/to/default-image.png'}" alt="${pub.title}"></div>
         <div class="card-content">
-            <div class="card-category">${getCategoryName(pub.category)}</div>
+            <div class="card-category">${getCategoryName(pub.area)}</div>
             <h3 class="card-title">${pub.title}</h3>
             <p class="card-description">${pub.description}</p>
             <div class="card-footer">
                 <div class="card-tags">
-                    ${pub.tags.slice(0, 2).map(tag => `<span class="card-tag">${tag}</span>`).join('')}
-                    ${pub.tags.length > 2 ? `<span class="card-tag">+${pub.tags.length - 2}</span>` : ''}
+                    ${tags.slice(0, 2).map(tag => `<span class="card-tag">${tag}</span>`).join('')}
+                    ${tags.length > 2 ? `<span class="card-tag">+${tags.length - 2}</span>` : ''}
                 </div>
                 <a href="detail?id=${pub.id}" class="view-more-button">Ver más</a>
             </div>
@@ -199,7 +146,7 @@ function createPublicationCard(pub) {
 }
 
 // Get category display name
-function getCategoryName(category) {
+function getCategoryName(area) {
     const names = {
         'programacion': 'Programación',
         'diseño': 'Diseño',
@@ -207,19 +154,18 @@ function getCategoryName(category) {
         'tutorial': 'Tutorial',
         'marketing': 'Marketing'
     };
-    return names[category] || category;
+    return names[area] || area;
 }
 
 // Get filtered publications
 function getFilteredPublications() {
     return publications.filter(pub => {
-        const matchesCategory = currentFilter === 'todas' || pub.category === currentFilter;
-        const matchesSearch = currentSearchTerm === '' || 
+        const matchesCategory = currentFilter === 'todas' || pub.area === currentFilter;
+        const matchesSearch = currentSearchTerm === '' ||
             pub.title.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
             pub.description.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
             pub.tags.some(tag => tag.toLowerCase().includes(currentSearchTerm.toLowerCase()));
         const matchesTag = currentTagFilter === '' || pub.tags.includes(currentTagFilter);
-        
         return matchesCategory && matchesSearch && matchesTag;
     });
 }
@@ -234,12 +180,10 @@ function performSearch() {
 
 // Filter by category
 function filterByCategory(category) {
-    // Update active filter
     document.querySelectorAll('.filter-item').forEach(item => {
         item.classList.remove('active');
     });
     event.target.classList.add('active');
-    
     currentFilter = category;
     currentPage = 1;
     renderPublications();
@@ -248,17 +192,14 @@ function filterByCategory(category) {
 
 // Filter by tag
 function filterByTag(tag) {
-    // Update active tag
     document.querySelectorAll('.tag-item').forEach(item => {
         item.classList.remove('active');
     });
     event.target.classList.add('active');
-    
     currentTagFilter = currentTagFilter === tag ? '' : tag;
     if (currentTagFilter === '') {
         event.target.classList.remove('active');
     }
-    
     currentPage = 1;
     renderPublications();
 }
@@ -266,20 +207,16 @@ function filterByTag(tag) {
 // Update tags section
 function updateTagsSection() {
     const filteredPublications = publications.filter(pub => {
-        const matchesCategory = currentFilter === 'todas' || pub.category === currentFilter;
-        const matchesSearch = currentSearchTerm === '' || 
+        const matchesCategory = currentFilter === 'todas' || pub.area === currentFilter;
+        const matchesSearch = currentSearchTerm === '' ||
             pub.title.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
             pub.description.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
             pub.tags.some(tag => tag.toLowerCase().includes(currentSearchTerm.toLowerCase()));
-        
         return matchesCategory && matchesSearch;
     });
-
     const allTags = [...new Set(filteredPublications.flatMap(pub => pub.tags))].sort();
-    
     const tagsContainer = document.getElementById('tagsContainer');
     tagsContainer.innerHTML = '';
-    
     allTags.forEach(tag => {
         const tagElement = document.createElement('div');
         tagElement.className = `tag-item ${currentTagFilter === tag ? 'active' : ''}`;
@@ -292,15 +229,10 @@ function updateTagsSection() {
 // Pagination
 function updatePagination(totalItems) {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    
-    // Update buttons
     document.getElementById('prevBtn').disabled = currentPage === 1;
     document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
-    
-    // Update page numbers
     const paginationNumbers = document.getElementById('paginationNumbers');
     paginationNumbers.innerHTML = '';
-    
     for (let i = 1; i <= totalPages; i++) {
         const pageNumber = document.createElement('span');
         pageNumber.className = `page-number ${i === currentPage ? 'active' : ''}`;
@@ -332,15 +264,11 @@ function nextPage() {
 // Dropdown functionality
 function toggleDropdown(event, publicationId) {
     event.stopPropagation();
-    
-    // Close all other dropdowns
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
         if (menu.id !== `dropdown-${publicationId}`) {
             menu.classList.remove('show');
         }
     });
-    
-    // Toggle current dropdown
     const dropdown = document.getElementById(`dropdown-${publicationId}`);
     dropdown.classList.toggle('show');
 }
@@ -360,26 +288,18 @@ function closeUploadModal() {
 function openEditModal(publicationId) {
     const publication = publications.find(p => p.id === publicationId);
     if (!publication) return;
-    
     editingPublicationId = publicationId;
-    
-    // Populate form with existing data
     document.getElementById('editTitle').value = publication.title;
     document.getElementById('editDescription').value = publication.description;
-    document.getElementById('editCategory').value = publication.category;
-    document.getElementById('editLink').value = publication.link || '';
-    
-    // Populate tags
+    document.getElementById('editArea').value = publication.area;
+    document.getElementById('editContent').value = publication.content || '';
     const tagsDisplay = document.getElementById('editTagsDisplay');
     tagsDisplay.innerHTML = '';
     publication.tags.forEach(tag => {
         addTagToDisplay(tag, 'edit');
     });
-    
     document.getElementById('editModal').classList.add('show');
     document.body.style.overflow = 'hidden';
-    
-    // Close dropdown
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
         menu.classList.remove('show');
     });
@@ -393,86 +313,94 @@ function closeEditModal() {
 }
 
 // Form submission
-function submitUpload() {
+async function submitUpload() {
     const title = document.getElementById('uploadTitle').value;
     const description = document.getElementById('uploadDescription').value;
-    const category = document.getElementById('uploadCategory').value;
-    const link = document.getElementById('uploadLink').value;
-    
-    if (!title || !description || !category) {
-        alert('Por favor completa todos los campos obligatorios.');
-        return;
-    }
-    
+    const area = document.getElementById('uploadArea').value;
+    const content = document.getElementById('uploadContent').value;
+    const imageInput = document.getElementById('uploadImage');
     const tags = Array.from(document.querySelectorAll('#uploadTagsDisplay .tag-chip'))
         .map(chip => chip.textContent.replace('×', '').trim());
-    
-    const newPublication = {
-        id: Date.now(),
-        title,
-        description,
-        category,
-        tags,
-        image: getRandomEmoji(),
-        link: link || null,
-        file: null
-    };
-    
-    publications.unshift(newPublication);
-    closeUploadModal();
-    renderPublications();
-    updateTagsSection();
-}
 
-function submitEdit() {
-    const title = document.getElementById('editTitle').value;
-    const description = document.getElementById('editDescription').value;
-    const category = document.getElementById('editCategory').value;
-    const link = document.getElementById('editLink').value;
-    
-    if (!title || !description || !category) {
-        alert('Por favor completa todos los campos obligatorios.');
+    if (!title || !description || !area || !content) {
+        showError('Por favor completa todos los campos obligatorios.');
         return;
     }
-    
-    const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
-        .map(chip => chip.textContent.replace('×', '').trim());
-    
-    const publicationIndex = publications.findIndex(p => p.id === editingPublicationId);
-    if (publicationIndex !== -1) {
-        publications[publicationIndex] = {
-            ...publications[publicationIndex],
-            title,
-            description,
-            category,
-            tags,
-            link: link || null
-        };
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('area', area);
+    formData.append('content', content);
+    formData.append('tags', JSON.stringify(tags));
+    formData.append('lastEditor', 'user123');
+    formData.append('creator', 'user123');
+    if (imageInput.files[0]) {
+        formData.append('image', imageInput.files[0]);
     }
-    
-    closeEditModal();
-    renderPublications();
-    updateTagsSection();
+
+    try {
+        await makeApiCall('tutorial/create', 'POST', formData, true);
+        showSuccess('Tutorial creado exitosamente');
+        closeUploadModal();
+        await fetchPublications();
+    } catch (error) {
+        console.error('Error creating tutorial:', error);
+    }
 }
 
-// Delete publication
-function deletePublication(publicationId) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta publicación?')) {
-        publications = publications.filter(p => p.id !== publicationId);
-        renderPublications();
-        updateTagsSection();
+async function submitEdit() {
+    const title = document.getElementById('editTitle').value;
+    const description = document.getElementById('editDescription').value;
+    const area = document.getElementById('editArea').value;
+    const content = document.getElementById('editContent').value;
+    const imageInput = document.getElementById('editImage');
+    const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
+        .map(chip => chip.textContent.replace('×', '').trim());
+
+    if (!title || !description || !area || !content) {
+        showError('Por favor completa todos los campos obligatorios.');
+        return;
     }
-    
-    // Close dropdown
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        menu.classList.remove('show');
-    });
+
+    const formData = new FormData();
+    formData.append('id', editingPublicationId);
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('area', area);
+    formData.append('content', content);
+    formData.append('tags', JSON.stringify(tags));
+    formData.append('lastEditor', 'user123');
+    if (imageInput.files[0]) {
+        formData.append('image', imageInput.files[0]);
+    }
+
+    try {
+        await makeApiCall('tutorial/update', 'POST', formData, true);
+        showSuccess('Tutorial actualizado exitosamente');
+        closeEditModal();
+        await fetchPublications();
+    } catch (error) {
+        console.error('Error updating tutorial:', error);
+    }
+}
+
+async function deletePublication(publicationId) {
+    const confirmed = await showConfirm('¿Estás seguro de que quieres eliminar esta publicación?');
+    if (!confirmed) return;
+
+    try {
+        await makeApiCall('tutorial/delete', 'POST', { id: publicationId });
+        showSuccess('Tutorial eliminado exitosamente');
+        await fetchPublications();
+    } catch (error) {
+        console.error('Error deleting tutorial:', error);
+    }
 }
 
 // Tag input functionality
 function setupTagInput(modalType) {
     const tagInput = document.getElementById(`${modalType}TagInput`);
-    
     tagInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && this.value.trim()) {
             e.preventDefault();
@@ -484,22 +412,17 @@ function setupTagInput(modalType) {
 
 function addTagToDisplay(tagText, modalType) {
     const tagsDisplay = document.getElementById(`${modalType}TagsDisplay`);
-    
-    // Check if tag already exists
     const existingTags = Array.from(tagsDisplay.querySelectorAll('.tag-chip'))
         .map(chip => chip.textContent.replace('×', '').trim());
-    
     if (existingTags.includes(tagText)) {
         return;
     }
-    
     const tagChip = document.createElement('div');
     tagChip.className = 'tag-chip';
     tagChip.innerHTML = `
         ${tagText}
         <button type="button" class="tag-remove" onclick="this.parentElement.remove()">×</button>
     `;
-    
     tagsDisplay.appendChild(tagChip);
 }
 
@@ -507,7 +430,6 @@ function addTagToDisplay(tagText, modalType) {
 function setupImageUpload(modalType) {
     const imageInput = document.getElementById(`${modalType}Image`);
     const imagePreview = document.getElementById(`${modalType}ImagePreview`);
-    
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -534,44 +456,55 @@ function resetEditForm() {
     document.getElementById('editImagePreview').style.display = 'none';
 }
 
-// Utility functions
-function getRandomEmoji() {
-    const emojis = ['💻', '🎨', '🍝', '📚', '📈', '⚡', '✍️', '🥗', '🎯', '🎭', '🚀', '💡', '🔧', '📱', '🌟'];
-    return emojis[Math.floor(Math.random() * emojis.length)];
+// User feedback functions
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    document.body.appendChild(errorDiv);
+    setTimeout(() => errorDiv.remove(), 3000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Check for saved theme preference or default to light mode
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    document.body.classList.toggle('dark-mode', currentTheme === 'dark');
+function showSuccess(message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.textContent = message;
+    document.body.appendChild(successDiv);
+    setTimeout(() => successDiv.remove(), 3000);
+}
 
-    // Update logo based on initial theme
-    const logo = document.querySelector('.icon');
-    if (logo) {
-        logo.src = currentTheme === 'dark' ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
-    }
-
-    // Update theme toggle button text based on initial theme
-    document.querySelectorAll('.theme-toggle').forEach(btn => {
-        btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+async function showConfirm(message) {
+    return new Promise(resolve => {
+        const confirmModal = document.createElement('div');
+        confirmModal.className = 'modal confirm-modal';
+        confirmModal.innerHTML = `
+            <div class="modal-content">
+                <p>${message}</p>
+                <button class="confirm-yes">Sí</button>
+                <button class="confirm-no">No</button>
+            </div>
+        `;
+        document.body.appendChild(confirmModal);
+        confirmModal.querySelector('.confirm-yes').onclick = () => {
+            confirmModal.remove();
+            resolve(true);
+        };
+        confirmModal.querySelector('.confirm-no').onclick = () => {
+            confirmModal.remove();
+            resolve(false);
+        };
     });
-});
+}
 
 // Theme toggle function
 function toggleTheme() {
     const isDarkMode = document.body.classList.toggle('dark-mode');
-    
-    // Update logo based on theme
     const logo = document.querySelector('.icon');
     if (logo) {
         logo.src = isDarkMode ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
     }
-
-    // Update theme toggle button text
     document.querySelectorAll('.theme-toggle').forEach(btn => {
         btn.textContent = isDarkMode ? '☀️' : '🌙';
     });
-
-    // Save theme preference
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 }
