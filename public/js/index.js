@@ -120,6 +120,7 @@ function createPublicationCard(pub) {
     card.className = 'card';
     // Ensure tags is an array, default to empty array if null or undefined
     const tags = Array.isArray(pub.tags) ? pub.tags : [];
+    const imageUrl = pub.image && pub.image.trim() !== '' ? pub.image : './assets/img/letra-k (1).png';
     card.innerHTML = `
         <div class="card-dropdown">
             <button class="dropdown-button" onclick="toggleDropdown(event, ${pub.id})">⋮</button>
@@ -128,7 +129,9 @@ function createPublicationCard(pub) {
                 <div class="dropdown-item delete" onclick="deletePublication(${pub.id})">🗑️ Eliminar</div>
             </div>
         </div>
-        <div class="card-image"><img src="${pub.image || '/path/to/default-image.png'}" alt="${pub.title}"></div>
+        <div class="card-image">
+            <img src="${imageUrl}" alt="${pub.title}">
+        </div>
         <div class="card-content">
             <div class="card-category">${getCategoryName(pub.area)}</div>
             <h3 class="card-title">${pub.title}</h3>
