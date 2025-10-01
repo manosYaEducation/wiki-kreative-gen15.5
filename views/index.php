@@ -125,6 +125,11 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="form-label">Contenido</label>
+                        <textarea class="form-textarea" id="uploadContent" required></textarea>
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label">Etiquetas</label>
                         <div class="tags-input-container" onclick="document.getElementById('uploadTagInput').focus()">
                             <div id="uploadTagsDisplay"></div>
