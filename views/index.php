@@ -183,7 +183,10 @@
                         <label class="form-label">Descripción *</label>
                         <textarea class="form-textarea" id="editDescription" required></textarea>
                     </div>
-
+                    <div class="form-group">
+                        <label class="form-label">Contenido *</label>
+                        <textarea class="form-textarea" id="editContent" required placeholder="Escribe el contenido completo del tutorial..."></textarea>
+                    </div>
                     <div class="form-group">
                         <label class="form-label">Área *</label>
                         <select class="form-select" id="editCategory" required>
