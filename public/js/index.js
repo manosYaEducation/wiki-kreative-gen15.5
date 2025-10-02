@@ -332,7 +332,7 @@ async function submitUpload() {
     formData.append('description', description);
     formData.append('area', area);
     formData.append('content', content);
-    formData.append('tags', JSON.stringify(tags));
+    formData.append('tags', tags);
     formData.append('lastEditor', 'user123');
     formData.append('creator', 'user123');
     if (imageInput.files[0]) {
