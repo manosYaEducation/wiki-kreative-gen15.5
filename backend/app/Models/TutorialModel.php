@@ -48,31 +48,41 @@ class TutorialModel
         ]);
     }
 
-    public function UpdateTutorial($data)
+public function UpdateTutorial($data)
     {
-        $stmt = $this->conn->prepare("
-            UPDATE tutorials SET
-                title = :title,
-                description = :description,
-                content = :content,
-                image = :image,
-                area = :area,
-                tags = :tags,
-                files = :files,
-                lastEditor = :lastEditor
-            WHERE id = :id
-        ");
-        return $stmt->execute([
-            ':title' => $data['title'],
-            ':description' => $data['description'],
-            ':content' => $data['content'],
-            ':image' => $data['image'],
-            ':area' => $data['area'],
-            ':tags' => json_encode($data['tags']),
-            ':files' => json_encode($data['files']),
-            ':lastEditor' => $data['lastEditor'],
-            ':id' => $data['id']
-        ]);
+        try {
+            // Validaciones por defecto para evitar notices
+            $tags = isset($data['tags']) ? $data['tags'] : [];
+            $files = isset($data['files']) ? $data['files'] : [];
+            
+            $stmt = $this->conn->prepare("
+                UPDATE tutorials SET
+                    title = :title,
+                    description = :description,
+                    content = :content,
+                    image = :image,
+                    area = :area,
+                    tags = :tags,
+                    files = :files,
+                    lastEditor = :lastEditor
+                WHERE id = :id
+            ");
+            
+            return $stmt->execute([
+                ':title' => $data['title'],
+                ':description' => $data['description'],
+                ':content' => $data['content'],
+                ':image' => $data['image'] ?? null, 
+                ':area' => $data['area'],
+                ':tags' => json_encode(is_array($tags) ? $tags : explode(',', $tags)),
+                ':files' => json_encode($files),
+                ':lastEditor' => $data['lastEditor'],
+                ':id' => $data['id']
+            ]);
+        } catch (PDOException $e) {
+            error_log("Error updating tutorial: " . $e->getMessage());
+            return false;
+        }
     }
 
 public function deleteTutorial($id)

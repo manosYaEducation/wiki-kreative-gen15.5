@@ -291,11 +291,12 @@ function openEditModal(publicationId) {
     editingPublicationId = publicationId;
     document.getElementById('editTitle').value = publication.title;
     document.getElementById('editDescription').value = publication.description;
-    document.getElementById('editArea').value = publication.area;
+    document.getElementById('editCategory').value = publication.area;
     document.getElementById('editContent').value = publication.content || '';
     const tagsDisplay = document.getElementById('editTagsDisplay');
     tagsDisplay.innerHTML = '';
-    publication.tags.forEach(tag => {
+    const tags = Array.isArray(publication.tags) ? publication.tags : [];
+    tags.forEach(tag => {
         addTagToDisplay(tag, 'edit');
     });
     document.getElementById('editModal').classList.add('show');
@@ -332,7 +333,7 @@ async function submitUpload() {
     formData.append('description', description);
     formData.append('area', area);
     formData.append('content', content);
-    formData.append('tags', JSON.stringify(tags));
+    formData.append('tags', tags);
     formData.append('lastEditor', 'user123');
     formData.append('creator', 'user123');
     if (imageInput.files[0]) {
@@ -352,7 +353,7 @@ async function submitUpload() {
 async function submitEdit() {
     const title = document.getElementById('editTitle').value;
     const description = document.getElementById('editDescription').value;
-    const area = document.getElementById('editArea').value;
+    const area = document.getElementById('editCategory').value;
     const content = document.getElementById('editContent').value;
     const imageInput = document.getElementById('editImage');
     const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
@@ -369,7 +370,7 @@ async function submitEdit() {
     formData.append('description', description);
     formData.append('area', area);
     formData.append('content', content);
-    formData.append('tags', JSON.stringify(tags));
+    formData.append('tags', tags);
     formData.append('lastEditor', 'user123');
     if (imageInput.files[0]) {
         formData.append('image', imageInput.files[0]);
