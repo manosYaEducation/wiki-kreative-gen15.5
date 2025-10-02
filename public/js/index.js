@@ -163,6 +163,7 @@ function getCategoryName(area) {
 // Get filtered publications
 function getFilteredPublications() {
     return publications.filter(pub => {
+        currentTagFilter = '';
         const matchesCategory = currentFilter === 'todas' || pub.area === currentFilter;
         const matchesSearch = currentSearchTerm === '' ||
             pub.title.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
@@ -172,7 +173,6 @@ function getFilteredPublications() {
         return matchesCategory && matchesSearch && matchesTag;
     });
 }
-
 // Search functionality
 function performSearch() {
     currentSearchTerm = document.getElementById('searchInput').value;
