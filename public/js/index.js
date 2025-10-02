@@ -389,15 +389,33 @@ async function submitEdit() {
 }
 
 async function deletePublication(publicationId) {
+    if (!publicationId || isNaN(publicationId)) {
+        console.error('Invalid publicationId:', publicationId);
+        showError('Error: ID de publicación no válido');
+        return;
+    }
+
     const confirmed = await showConfirm('¿Estás seguro de que quieres eliminar esta publicación?');
-    if (!confirmed) return;
+    if (!confirmed) {
+        console.log('Eliminación cancelada por el usuario.');
+        return;
+    }
 
     try {
-        await makeApiCall('tutorial/delete', 'POST', { id: publicationId });
+        console.log('Enviando petición de eliminación al backend con ID:', publicationId);
+        const formData = new FormData();
+        formData.append('id', publicationId);
+        await makeApiCall('tutorial/delete', 'POST', formData, true);
+        console.log('Publicación eliminada.');
         showSuccess('Tutorial eliminado exitosamente');
         await fetchPublications();
     } catch (error) {
         console.error('Error deleting tutorial:', error);
+        showError(`Error al eliminar la publicación: ${error.message}`);
+    } finally {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
     }
 }
 
@@ -478,24 +496,45 @@ function showSuccess(message) {
 
 async function showConfirm(message) {
     return new Promise(resolve => {
+        // Create the modal
         const confirmModal = document.createElement('div');
-        confirmModal.className = 'modal confirm-modal';
+        confirmModal.className = 'modal confirm-modal show'; // Add 'show' class immediately
         confirmModal.innerHTML = `
             <div class="modal-content">
-                <p>${message}</p>
-                <button class="confirm-yes">Sí</button>
-                <button class="confirm-no">No</button>
+                <p style="margin-bottom: 20px; font-size: 16px; color: #333;">${message}</p>
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <button class="btn btn-primary confirm-yes">Sí</button>
+                    <button class="btn btn-secondary confirm-no">No</button>
+                </div>
             </div>
         `;
+        
+        // Append to body
         document.body.appendChild(confirmModal);
-        confirmModal.querySelector('.confirm-yes').onclick = () => {
+
+        // Ensure modal is visible
+        confirmModal.style.display = 'flex';
+
+        // Add event listeners
+        const yesButton = confirmModal.querySelector('.confirm-yes');
+        const noButton = confirmModal.querySelector('.confirm-no');
+
+        yesButton.onclick = () => {
             confirmModal.remove();
             resolve(true);
         };
-        confirmModal.querySelector('.confirm-no').onclick = () => {
+        noButton.onclick = () => {
             confirmModal.remove();
             resolve(false);
         };
+
+        // Allow closing modal by clicking outside
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) {
+                confirmModal.remove();
+                resolve(false);
+            }
+        });
     });
 }
 

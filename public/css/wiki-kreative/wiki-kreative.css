@@ -931,7 +931,6 @@ body.dark-mode .upload-text {
     font-size: 14px;
     transition: color 0.3s;
 }
-
 body.dark-mode .upload-subtext {
     color: #9ca3af;
 }
@@ -1609,3 +1608,30 @@ body.dark-mode .back-to-site:hover {
     background-color: #3A3A3A; /* Slightly lighter than dark background */
     color: #4CAF50; /* Optional: Keep the hover color consistent */
 }
+
+/* Estilos de modal de confirmacion para eliminar publicacion */
+.confirm-modal .modal-content {
+    padding: 24px;
+    text-align: center;
+}
+
+body.dark-mode .confirm-modal .modal-content {
+    background-color: #1E1E1E;
+    color: #E0E0E0;
+}
+
+.confirm-modal .modal-content p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #333;
+}
+
+body.dark-mode .confirm-modal .modal-content p {
+    color: #E0E0E0;
+}
+
+.confirm-modal .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+/* Estilos de modal de confirmacion para eliminar publicacion */
