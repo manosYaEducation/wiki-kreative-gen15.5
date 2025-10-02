@@ -30,23 +30,32 @@ class TutorialModel
 
     public function createTutorial($data)
     {
-        $stmt = $this->conn->prepare("
-            INSERT INTO tutorials (id, title, description, content, image, area, tags, files, lastEditor, creator)
-            VALUES (:id, :title, :description, :content, :image, :area, :tags, :files, :lastEditor, :creator)
-        ");
-        return $stmt->execute([
-            ':id' => $data['id'],
-            ':title' => $data['title'],
-            ':description' => $data['description'],
-            ':content' => $data['content'],
-            ':image' => $data['image'],
-            ':area' => $data['area'],
-            ':tags' => json_encode($data['tags']),
-            ':files' => json_encode($data['files']),
-            ':lastEditor' => $data['lastEditor'],
-            ':creator' => $data['creator']
-        ]);
+        try {
+            $tags = isset($data['tags']) ? $data['tags'] : [];
+            $files = isset($data['files']) ? $data['files'] : [];
+            
+            $stmt = $this->conn->prepare("
+                INSERT INTO tutorials (title, description, content, image, area, tags, files, lastEditor, creator)
+                VALUES (:title, :description, :content, :image, :area, :tags, :files, :lastEditor, :creator)
+            ");
+            
+            return $stmt->execute([
+                ':title' => $data['title'],
+                ':description' => $data['description'],
+                ':content' => $data['content'],
+                ':image' => $data['image'] ?? null,
+                ':area' => $data['area'],
+                ':tags' => json_encode(is_array($tags) ? $tags : explode(',', $tags)),
+                ':files' => json_encode($files),
+                ':lastEditor' => $data['lastEditor'],
+                ':creator' => $data['creator']
+            ]);
+        } catch (PDOException $e) {
+            error_log("Error creating tutorial: " . $e->getMessage());
+            return false;
+        }
     }
+
 
     public function UpdateTutorial($data)
     {

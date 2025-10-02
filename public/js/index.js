@@ -319,7 +319,7 @@ function closeEditModal() {
 async function submitUpload() {
     const title = document.getElementById('uploadTitle').value;
     const description = document.getElementById('uploadDescription').value;
-    const area = document.getElementById('uploadArea').value;
+    const area = document.getElementById('uploadCategory').value;
     const content = document.getElementById('uploadContent').value;
     const imageInput = document.getElementById('uploadImage');
     const tags = Array.from(document.querySelectorAll('#uploadTagsDisplay .tag-chip'))
@@ -335,7 +335,7 @@ async function submitUpload() {
     formData.append('description', description);
     formData.append('area', area);
     formData.append('content', content);
-    formData.append('tags', JSON.stringify(tags));
+    formData.append('tags', tags);
     formData.append('lastEditor', 'user123');
     formData.append('creator', 'user123');
     if (imageInput.files[0]) {
