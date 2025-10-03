@@ -34,20 +34,67 @@ class TutorialController
         $this->sendJsonResponse($tutorials);
     }
 
-    public function createTutorial()
-    {
-        $data = $_POST;
-        if (empty($data)) {
-            return $this->sendJsonResponse(['error' => 'No data received'], 400);
-        }
-        $success = $this->tutorialModel->createTutorial($data);
-        if ($success) {
-            $this->sendJsonResponse(['message' => 'Tutorial created successfully']);
-        } 
-        else {
-            $this->sendJsonResponse(['error' => 'Failed to create tutorial'], 500);
+public function createTutorial()
+{
+    $data = $_POST;
+    if (empty($data)) {
+        return $this->sendJsonResponse(['error' => 'No data received'], 400);
+    }
+
+    $imagePath = null;
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $imagePath = $this->handleImageUpload($_FILES['image']);
+        if (!$imagePath) {
+            return $this->sendJsonResponse(['error' => 'Failed to upload image'], 400);
         }
     }
+
+    $data['image'] = $imagePath;
+
+    if (isset($data['tags'])) {
+        $data['tags'] = json_decode($data['tags'], true) ?? $data['tags'];
+    }
+
+    $success = $this->tutorialModel->createTutorial($data);
+    if ($success) {
+        $this->sendJsonResponse(['message' => 'Tutorial created successfully']);
+    } else {
+        if ($imagePath && file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+        $this->sendJsonResponse(['error' => 'Failed to create tutorial'], 500);
+    }
+}
+
+private function handleImageUpload($file)
+{
+    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/wiki-kreative-gen15.5/public/uploads/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    $maxFileSize = 5 * 1024 * 1024; // 5MB
+
+    if (!in_array($file['type'], $allowedTypes)) {
+        return false;
+    }
+
+    if ($file['size'] > $maxFileSize) {
+        return false;
+    }
+
+    // Generar nombre de la imagen
+    $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $fileName = uniqid('img_') . '.' . $fileExtension;
+    $destination = $uploadDir . $fileName;
+
+    if (move_uploaded_file($file['tmp_name'], $destination)) {
+            return '/wiki-kreative-gen15.5/public/uploads/' . $fileName;
+    }
+
+    return false;
+}
     
     public function UpdateTutorial()
     {
