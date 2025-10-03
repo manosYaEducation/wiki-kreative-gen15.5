@@ -31,7 +31,7 @@ class TutorialModel
     public function createTutorial($data)
     {
         try {
-            $tags = isset($data['tags']) ? $data['tags'] : [];
+            $tags = isset($data['tags']) && !empty($data['tags']) ? $data['tags'] : [];
             $files = isset($data['files']) ? $data['files'] : [];
             
             $stmt = $this->conn->prepare("
@@ -59,8 +59,7 @@ class TutorialModel
 public function UpdateTutorial($data)
     {
         try {
-            // Validaciones por defecto para evitar notices
-            $tags = isset($data['tags']) ? $data['tags'] : [];
+            $tags = isset($data['tags']) && !empty($data['tags']) ? $data['tags'] : [];
             $files = isset($data['files']) ? $data['files'] : [];
             
             $stmt = $this->conn->prepare("
