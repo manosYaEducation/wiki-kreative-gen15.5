@@ -120,26 +120,33 @@ private function handleImageUpload($file)
         echo json_encode($data);
         exit;
     }
-    public function deleteTutorial()
-    {
-        $data = $_POST;
+public function deleteTutorial()
+{
+    $data = $_POST;
+    $id = $data['id'] ?? null;
 
-        $id = $data['id'] ?? null;
+    if (!$id) {
+        return $this->sendJsonResponse(['error' => 'ID is required'], 400);
+    }
 
-        if (!$id) {
-            return $this->sendJsonResponse(['error' => 'ID is required'], 400);
-        }
+    $tutorial = $this->tutorialModel->GetTutorialById($id);
+    if (!$tutorial) {
+        return $this->sendJsonResponse(['error' => 'Tutorial not found'], 404);
+    }
 
-        $tutorial = $this->tutorialModel->GetTutorialById($id);
-        if (!$tutorial) {
-            return $this->sendJsonResponse(['error' => 'Tutorial not found'], 404);
-        }
-
-        $success = $this->tutorialModel->deleteTutorial($id);
-        if ($success) {
-            $this->sendJsonResponse(['message' => 'Tutorial deleted successfully']);
-        } else {
-            $this->sendJsonResponse(['error' => 'Failed to delete tutorial'], 500);
+    // Intentar eliminar la imagen si existe
+    if (!empty($tutorial['image'])) {
+        $imagePath = $_SERVER['DOCUMENT_ROOT'] . $tutorial['image'];
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
         }
     }
+
+    $success = $this->tutorialModel->deleteTutorial($id);
+    if ($success) {
+        $this->sendJsonResponse(['message' => 'Tutorial deleted successfully']);
+    } else {
+        $this->sendJsonResponse(['error' => 'Failed to delete tutorial'], 500);
+    }
+}
 }
