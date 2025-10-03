@@ -96,22 +96,52 @@ private function handleImageUpload($file)
     return false;
 }
     
-    public function UpdateTutorial()
-    {
-        $data = $_POST;
-        if (empty($data) || !isset($data['id'])) {
-            return $this->sendJsonResponse(['error' => 'Missing ID'], 400);
-        }
-        
-        $success = $this->tutorialModel->UpdateTutorial($data);
-        
-        if ($success) {
-            $this->sendJsonResponse(['message' => 'Tutorial updated successfully']);
-        } 
-        else {
-            $this->sendJsonResponse(['error' => 'Failed to update tutorial'], 500);
-        }
+public function UpdateTutorial()
+{
+    $data = $_POST;
+    if (empty($data) || !isset($data['id'])) {
+        return $this->sendJsonResponse(['error' => 'Missing ID'], 400);
     }
+
+    // Obtener el tutorial actual
+    $tutorial = $this->tutorialModel->GetTutorialById($data['id']);
+    if (!$tutorial) {
+        return $this->sendJsonResponse(['error' => 'Tutorial not found'], 404);
+    }
+
+    $imagePath = $tutorial['image']; // Imagen actual
+
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $newImagePath = $this->handleImageUpload($_FILES['image']);
+        if (!$newImagePath) {
+            return $this->sendJsonResponse(['error' => 'Failed to upload new image'], 400);
+        }
+
+        // Borrar la imagen anterior del servidor
+        if (!empty($imagePath)) {
+            $fullOldImagePath = $_SERVER['DOCUMENT_ROOT'] . $imagePath;
+            if (file_exists($fullOldImagePath)) {
+                unlink($fullOldImagePath);
+            }
+        }
+
+        // Actualizar la ruta de la imagen
+        $imagePath = $newImagePath;
+    }
+
+    $data['image'] = $imagePath;
+
+    if (isset($data['tags'])) {
+        $data['tags'] = json_decode($data['tags'], true) ?? $data['tags'];
+    }
+
+    $success = $this->tutorialModel->UpdateTutorial($data);
+    if ($success) {
+        $this->sendJsonResponse(['message' => 'Tutorial updated successfully']);
+    } else {
+        $this->sendJsonResponse(['error' => 'Failed to update tutorial'], 500);
+    }
+}
 
     private function sendJsonResponse($data, $statusCode = 200)
     {
