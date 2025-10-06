@@ -212,25 +212,21 @@ function filterByTag(tag) {
     }
     currentPage = 1;
     renderPublications();
+    updateTagsSection();
 }
 
 // Update tags section
 function updateTagsSection() {
-    const filteredPublications = publications.filter(pub => {
-        const matchesCategory = currentFilter === 'todas' || pub.area === currentFilter;
-        const matchesSearch = currentSearchTerm === '' ||
-            pub.title.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-            pub.description.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-            pub.tags.some(tag => tag.toLowerCase().includes(currentSearchTerm.toLowerCase()));
-        return matchesCategory && matchesSearch;
-    });
+    const filteredPublications = getFilteredPublications();
     const allTags = [...new Set(
-    filteredPublications
-        .flatMap(pub => pub.tags)
-        .filter(tag => tag && tag.trim() !== '')
+        filteredPublications
+            .flatMap(pub => Array.isArray(pub.tags) ? pub.tags : [])
+            .filter(tag => tag && tag.trim() !== '')
     )].sort();
+
     const tagsContainer = document.getElementById('tagsContainer');
     tagsContainer.innerHTML = '';
+
     allTags.forEach(tag => {
         const tagElement = document.createElement('div');
         tagElement.className = `tag-item ${currentTagFilter === tag ? 'active' : ''}`;
