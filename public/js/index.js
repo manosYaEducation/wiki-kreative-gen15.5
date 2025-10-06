@@ -224,7 +224,11 @@ function updateTagsSection() {
             pub.tags.some(tag => tag.toLowerCase().includes(currentSearchTerm.toLowerCase()));
         return matchesCategory && matchesSearch;
     });
-    const allTags = [...new Set(filteredPublications.flatMap(pub => pub.tags))].sort();
+    const allTags = [...new Set(
+    filteredPublications
+        .flatMap(pub => pub.tags)
+        .filter(tag => tag && tag.trim() !== '')
+    )].sort();
     const tagsContainer = document.getElementById('tagsContainer');
     tagsContainer.innerHTML = '';
     allTags.forEach(tag => {
