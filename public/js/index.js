@@ -163,8 +163,6 @@ function getCategoryName(area) {
 // Get filtered publications
 function getFilteredPublications() {
     return publications.filter(pub => {
-        currentTagFilter = '';
-
         // Se asegura que pub.tags sea array
         const tags = Array.isArray(pub.tags)
             ? pub.tags
