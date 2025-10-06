@@ -164,12 +164,21 @@ function getCategoryName(area) {
 function getFilteredPublications() {
     return publications.filter(pub => {
         currentTagFilter = '';
+
+        // Se asegura que pub.tags sea array
+        const tags = Array.isArray(pub.tags)
+            ? pub.tags
+            : (typeof pub.tags === 'string' && pub.tags.trim().startsWith('[')
+                ? JSON.parse(pub.tags)
+                : []);
+
         const matchesCategory = currentFilter === 'todas' || pub.area === currentFilter;
         const matchesSearch = currentSearchTerm === '' ||
             pub.title.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
             pub.description.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-            pub.tags.some(tag => tag.toLowerCase().includes(currentSearchTerm.toLowerCase()));
-        const matchesTag = currentTagFilter === '' || pub.tags.includes(currentTagFilter);
+            tags.some(tag => tag.toLowerCase().includes(currentSearchTerm.toLowerCase()));
+        const matchesTag = currentTagFilter === '' || tags.includes(currentTagFilter);
+
         return matchesCategory && matchesSearch && matchesTag;
     });
 }
