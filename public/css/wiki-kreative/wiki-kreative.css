@@ -292,6 +292,7 @@ body.dark-mode .filter-item:hover {
 
 /* Tags Section */
 .tags-section {
+    min-height: 300px;
     background-color: white;
     border-radius: 12px;
     overflow: hidden;
