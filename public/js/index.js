@@ -193,8 +193,14 @@ function filterByCategory(category) {
     document.querySelectorAll('.filter-item').forEach(item => {
         item.classList.remove('active');
     });
+
     event.target.classList.add('active');
     currentFilter = category;
+    currentTagFilter = '';
+    document.querySelectorAll('.tag-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
     currentPage = 1;
     renderPublications();
     updateTagsSection();
