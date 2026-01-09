@@ -17,7 +17,6 @@ body.dark-mode {
     color: #E0E0E0;
 }
 
-/* Header */
 .header {
     background-color: white;
     padding: 16px 24px;
@@ -27,6 +26,9 @@ body.dark-mode {
     border-bottom: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: background-color 0.3s, border-color 0.3s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-align: center;
+    color: #18a624;
 }
 
 body.dark-mode .header {
@@ -47,7 +49,7 @@ body.dark-mode .header {
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
-    color: #6b7280;
+    color: #dee0e4;
     transition: background-color 0.2s, color 0.2s;
 }
 
