@@ -123,7 +123,15 @@ function createPublicationCard(pub) {
     // Ensure tags is an array, default to empty array if null or undefined
     const tags = Array.isArray(pub.tags) ? pub.tags : [];
     const imageUrl = pub.image && pub.image.trim() !== '' ? pub.image : './assets/img/letra-k (1).png';
-    card.innerHTML = `
+    
+    // comprobar si el usuario está logueado
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' || 
+                      localStorage.getItem('userLoggedIn') === 'true' ||
+                      sessionStorage.getItem('userId') || 
+                      localStorage.getItem('userId');
+    
+    // mostrar solo si esta logueado para editar y eliminar publiaciones
+    const dropdownMenu = isLoggedIn ? `
         <div class="card-dropdown">
             <button class="dropdown-button" onclick="toggleDropdown(event, ${pub.id})">⋮</button>
             <div class="dropdown-menu" id="dropdown-${pub.id}">
@@ -131,6 +139,10 @@ function createPublicationCard(pub) {
                 <div class="dropdown-item delete" onclick="deletePublication(${pub.id})">🗑️ Eliminar</div>
             </div>
         </div>
+    ` : '';
+    
+    card.innerHTML = `
+        ${dropdownMenu}
         <div class="card-image">
             <img src="${imageUrl}" alt="${pub.title}">
         </div>
@@ -583,13 +595,20 @@ function checkSessionStatus() {
 function updateUploadButton(isLoggedIn) {
     const uploadButtonIcon = document.getElementById('uploadButtonIcon');
     const uploadButtonText = document.getElementById('uploadButtonText');
+    const logoutButton = document.getElementById('logoutButton');
     
     if (isLoggedIn) {
         uploadButtonIcon.textContent = '📝';
         uploadButtonText.textContent = 'Subir Publicación';
+        if (logoutButton) {
+            logoutButton.style.display = 'flex';
+        }
     } else {
         uploadButtonIcon.textContent = '🔐';
         uploadButtonText.textContent = 'Iniciar Sesión';
+        if (logoutButton) {
+            logoutButton.style.display = 'none';
+        }
     }
 }
 
@@ -606,6 +625,21 @@ function handleUploadButtonClick() {
         // Usuario no está logueado, redirigir a login
         window.location.href = './views/login.html';
     }
+}
+
+// Handle logout
+function handleLogout() {
+    // Limpiar todas las sesiones
+    sessionStorage.removeItem('userLoggedIn');
+    sessionStorage.removeItem('userId');
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userId');
+    
+    // Actualizar la interfaz
+    checkSessionStatus();
+    
+    // Recargar las publicaciones para ocultar los menús de edición
+    renderPublications();
 }
 
 // Monitor session changes (useful when user logs in from another tab/window)
