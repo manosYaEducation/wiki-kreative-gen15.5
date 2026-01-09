@@ -16,9 +16,9 @@ class Database
         $prefix = strtoupper($environment) . '_DB_';
 
         $host = $_ENV[$prefix . 'HOST'] ?? 'localhost';
-        $db   = $_ENV[$prefix . 'NAME'] ?? 'wiki_kreative';
-        $user = $_ENV[$prefix . 'USER'] ?? 'root';
-        $pass = $_ENV[$prefix . 'PASS'] ?? '';
+        $db   = $_ENV[$prefix . 'NAME'] ?? 'alphadocere_wiki';
+        $user = $_ENV[$prefix . 'USER'] ?? 'alphadocere_wiki_user';
+        $pass = $_ENV[$prefix . 'PASS'] ?? 'O*2EKat5bU6-';
         $port = $_ENV[$prefix . 'PORT'] ?? '3306';
         $charset = 'utf8mb4';
 
