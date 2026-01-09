@@ -66,6 +66,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
     });
 
+    checkSessionStatus();
+
     await fetchPublications();
     setupEventListeners();
 });
@@ -564,3 +566,51 @@ function toggleTheme() {
     });
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 }
+
+
+// Check if user is logged in and update button accordingly
+function checkSessionStatus() {
+    // Verificar si existe una sesión activa en sessionStorage o localStorage
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' || 
+                      localStorage.getItem('userLoggedIn') === 'true' ||
+                      sessionStorage.getItem('userId') || 
+                      localStorage.getItem('userId');
+    
+    updateUploadButton(isLoggedIn);
+}
+
+// Update upload button text and functionality
+function updateUploadButton(isLoggedIn) {
+    const uploadButtonIcon = document.getElementById('uploadButtonIcon');
+    const uploadButtonText = document.getElementById('uploadButtonText');
+    
+    if (isLoggedIn) {
+        uploadButtonIcon.textContent = '📝';
+        uploadButtonText.textContent = 'Subir Publicación';
+    } else {
+        uploadButtonIcon.textContent = '🔐';
+        uploadButtonText.textContent = 'Iniciar Sesión';
+    }
+}
+
+function handleUploadButtonClick() {
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' ||
+                        localStorage.getItem('userLoggedIn') === 'true' ||
+                        sessionStorage.getItem('userId') ||
+                        localStorage.getItem('userId');
+    
+    if (isLoggedIn) {
+        // Usuario está logueado, abrir modal de subida
+        openUploadModal();
+    } else {
+        // Usuario no está logueado, redirigir a login
+        window.location.href = './views/login.html';
+    }
+}
+
+// Monitor session changes (useful when user logs in from another tab/window)
+window.addEventListener('storage', function(e) {
+    if (e.key === 'userLoggedIn' || e.key === 'userId') {
+        checkSessionStatus();
+    }
+});
