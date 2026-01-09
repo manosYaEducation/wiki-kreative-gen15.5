@@ -385,6 +385,12 @@ body.dark-mode .content-header h1 {
     color: #E0E0E0;
 }
 
+.header-buttons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
 .upload-button {
     background-color: #4CAF50;
     color: white;
@@ -402,6 +408,26 @@ body.dark-mode .content-header h1 {
 
 .upload-button:hover {
     background-color: #22c55e;
+    transform: translateY(-1px);
+}
+
+.logout-button {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logout-button:hover {
+    background-color: #ef4444;
     transform: translateY(-1px);
 }
 

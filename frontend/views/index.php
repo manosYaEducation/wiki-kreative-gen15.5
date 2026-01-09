@@ -65,10 +65,16 @@
             <div class="content-header">
                 <h1 style="font-size: 28px; font-weight: 700; color: #1f2937;">Wiki KREATIVE</h1>
 
-                <button class="upload-button" id="uploadButton" onclick="handleUploadButtonClick()">
-                    <span id="uploadButtonIcon">📝</span>
-                    <span id="uploadButtonText">Subir Publicación</span>
-                </button>
+                <div class="header-buttons">
+                    <button class="upload-button" id="uploadButton" onclick="handleUploadButtonClick()">
+                        <span id="uploadButtonIcon">📝</span>
+                        <span id="uploadButtonText">Subir Publicación</span>
+                    </button>
+                    <button class="logout-button" id="logoutButton" onclick="handleLogout()" style="display: none;">
+                        <span>🚪</span>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </div>
             </div>
 
             <div class="card-grid" id="cardGrid">
