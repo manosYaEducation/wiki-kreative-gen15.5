@@ -5,7 +5,7 @@ require_once __DIR__ . '/autoload.php';
 use App\Frontend\Router;
 
 // Define the base path for the frontend
-$basePath = '/wiki-kreative-gen15.5/frontend';
+$basePath = '/frontend';
 // $basePath = '';
 
 // Cargar las definiciones de rutas
