@@ -1,8 +1,8 @@
 -- Create the database
-CREATE DATABASE IF NOT EXISTS wiki_kreative CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS alphadocere_wiki CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Use the database
-USE wiki_kreative;
+USE alphadocere_wiki;
 
 -- Create the main table
 CREATE TABLE IF NOT EXISTS tutorials (

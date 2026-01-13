@@ -17,8 +17,8 @@ class Database
 
         $host = $_ENV[$prefix . 'HOST'] ?? 'localhost';
         $db   = $_ENV[$prefix . 'NAME'] ?? 'alphadocere_wiki';
-        $user = $_ENV[$prefix . 'USER'] ?? 'alphadocere_wiki_user';
-        $pass = $_ENV[$prefix . 'PASS'] ?? 'O*2EKat5bU6-';
+        $user = $_ENV[$prefix . 'USER'] ?? 'root';
+        $pass = $_ENV[$prefix . 'PASS'] ?? '';
         $port = $_ENV[$prefix . 'PORT'] ?? '3306';
         $charset = 'utf8mb4';
 

@@ -6,8 +6,8 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Backend\Router;
 
-// Headers para CORS (puedes ajustar según sea necesario)
-header("Access-Control-Allow-Origin: https://wiki.alphadocere.cl"); // Permitir solo frontend
+// Headers para CORS (puedes ajustar según sea necesario) para deployar: https://wiki.alphadocere.cl en lugar de localhost
+header("Access-Control-Allow-Origin: localhost"); // Permitir solo frontend
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // La base del path para la API
-$basePath = '/backend/public';
+$basePath = '/wiki-kreative-gen15.5/backend/public';
 
 // Cargar las definiciones de rutas
 $routes = require_once __DIR__ . '/../app/Routes/api.php';

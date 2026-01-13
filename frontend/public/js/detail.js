@@ -1,4 +1,4 @@
-const API_BASE_URL = '/backend/public';
+const API_BASE_URL = '/wiki-kreative-gen15.5/backend/public';
 
 // Reusable API call function with improved error handling
 async function makeApiCall(url, method = 'GET', body = null, includeFiles = false) {

@@ -1,4 +1,4 @@
-const API_BASE_URL = '/backend/public';
+const API_BASE_URL = '/wiki-kreative-gen15.5/backend/public';
 let currentPage = 1;
 let currentFilter = 'todas';
 let currentSearchTerm = '';
