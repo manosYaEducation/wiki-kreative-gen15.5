@@ -7,7 +7,7 @@ if (window.location.pathname.startsWith('/wiki-kreative')) {
     BASE_PATH='/backend/public';
 }
 
-//const API_BASE_URL = BASE_PATH;
+const API_BASE_URL = BASE_PATH;
 
 
 let currentPage = 1;
