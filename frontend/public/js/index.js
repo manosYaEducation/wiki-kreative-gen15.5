@@ -133,8 +133,14 @@ function createPublicationCard(pub) {
     card.className = 'card';
     // Ensure tags is an array, default to empty array if null or undefined
     const tags = Array.isArray(pub.tags) ? pub.tags : [];
-    const imageUrl = pub.image && pub.image.trim() !== '' ? pub.image : './assets/img/letra-k (1).png';
     
+    
+
+    const imageUrl = pub.image && pub.image.trim() !== '' ? pub.image : '../assets/img/kreativenofondo.png';
+
+    
+   
+   
     // comprobar si el usuario está logueado
     const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' || 
                       localStorage.getItem('userLoggedIn') === 'true' ||
@@ -151,7 +157,35 @@ function createPublicationCard(pub) {
             </div>
         </div>
     ` : '';
+
+    //alt="${pub.title}
     
+    card.innerHTML = `
+    ${dropdownMenu}
+    
+    <div class="card-image">
+        <img src="${imageUrl}" alt="${pub.title}">
+       
+        <span class="card-badge">${getCategoryName(pub.area)}</span>
+    </div>
+
+    <div class="card-body">
+        <h3 class="card-title">${pub.title}</h3>
+        <p class="card-description">${pub.description}</p>
+
+        <div class="card-footer">
+                <div class="card-tags">
+                    ${tags.slice(0, 3).map(tag => `<span class="card-tag">${tag}</span>`).join('')}
+                    ${tags.length > 2 ? `<span class="card-tag">+${tags.length - 2}</span>` : ''}
+                </div>
+                
+        </div>
+        <br>
+        <a href="detail?id=${pub.id}" class="view-more-button">Ver más</a>
+    </div>
+`;
+
+    /*
     card.innerHTML = `
         ${dropdownMenu}
         <div class="card-image">
@@ -170,6 +204,7 @@ function createPublicationCard(pub) {
             </div>
         </div>
     `;
+    */
     return card;
 }
 
