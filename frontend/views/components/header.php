@@ -1,8 +1,14 @@
     <header class="header">
         <nav>
+            
             <div class="nav-left">
-                <img src="../assets/img/kreativenofondo.png" alt="Icono" class="icon">
+                <a href="<?php echo (strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false)
+                    ? '/wiki-kreative-gen15.5/frontend/'
+                    : '/frontend/'; ?>">
+                    <img src="../assets/img/kreativenofondo.png" alt="Icono" class="icon">
+                </a>
                 <h1>Bienvenidas/os a la Wiki Kreative</h1>
+                
             </div>
             <!--
             <div class="navbar" class="back-button">
