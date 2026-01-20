@@ -147,7 +147,7 @@
 
                     <div class="form-group">
                         <label class="form-label">Archivo adjunto</label>
-                        <input type="file" class="form-input" id="uploadFile">
+                        <input id="uploadFiles" type="file" name="files[]" multiple>
                     </div>
 
                     <div class="form-group">
@@ -217,7 +217,7 @@
 
                     <div class="form-group">
                         <label class="form-label">Archivo adjunto (opcional)</label>
-                        <input type="file" class="form-input" id="editFile">
+                        <input id="editFiles" type="file" name="files[]" multiple>
                     </div>
 
                     <div class="form-group">

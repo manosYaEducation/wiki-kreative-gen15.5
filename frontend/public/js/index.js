@@ -361,6 +361,7 @@ async function submitUpload() {
     const area = document.getElementById('uploadCategory').value;
     const content = document.getElementById('uploadContent').value;
     const imageInput = document.getElementById('uploadImage');
+
     const tags = Array.from(document.querySelectorAll('#uploadTagsDisplay .tag-chip'))
         .map(chip => chip.textContent.replace('×', '').trim());
 
@@ -374,11 +375,20 @@ async function submitUpload() {
     formData.append('description', description);
     formData.append('area', area);
     formData.append('content', content);
-    formData.append('tags', tags);
+    formData.append('tags', JSON.stringify(tags));
     formData.append('lastEditor', 'user123');
     formData.append('creator', 'user123');
+
     if (imageInput.files[0]) {
         formData.append('image', imageInput.files[0]);
+    }
+
+    // [NUEVO] Adjuntos (files) - múltiple (va DESPUÉS de crear formData)
+    const filesInput = document.getElementById('uploadFiles');
+    if (filesInput && filesInput.files && filesInput.files.length > 0) {
+        for (const file of filesInput.files) {
+            formData.append('files[]', file);
+        }
     }
 
     try {
@@ -391,12 +401,14 @@ async function submitUpload() {
     }
 }
 
+
 async function submitEdit() {
     const title = document.getElementById('editTitle').value;
     const description = document.getElementById('editDescription').value;
     const area = document.getElementById('editCategory').value;
     const content = document.getElementById('editContent').value;
     const imageInput = document.getElementById('editImage');
+
     const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
         .map(chip => chip.textContent.replace('×', '').trim());
 
@@ -411,10 +423,19 @@ async function submitEdit() {
     formData.append('description', description);
     formData.append('area', area);
     formData.append('content', content);
-    formData.append('tags', tags);
+    formData.append('tags', JSON.stringify(tags));
     formData.append('lastEditor', 'user123');
+
     if (imageInput.files[0]) {
         formData.append('image', imageInput.files[0]);
+    }
+
+    // [NUEVO] Adjuntos (files) - múltiple (va DESPUÉS de crear formData)
+    const filesInput = document.getElementById('editFiles');
+    if (filesInput && filesInput.files && filesInput.files.length > 0) {
+        for (const file of filesInput.files) {
+            formData.append('files[]', file);
+        }
     }
 
     try {
@@ -426,6 +447,7 @@ async function submitEdit() {
         console.error('Error updating tutorial:', error);
     }
 }
+
 
 async function deletePublication(publicationId) {
     if (!publicationId || isNaN(publicationId)) {
