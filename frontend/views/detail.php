@@ -73,22 +73,10 @@
         <!-- Attachments Section -->
         <div class="attachments-section" id="attachmentsSection" style="display: none;">
             <h2 class="attachments-title">Archivos Adjuntos</h2>
-            <div class="attachment-item">
-                <div class="attachment-icon">📄</div>
-                <div class="attachment-info">
-                    <div class="attachment-name">Documento de referencia.pdf</div>
-                    <div class="attachment-size">2.5 MB</div>
-                </div>
-                <a href="#" class="download-btn">Descargar</a>
-            </div>
-            <div class="attachment-item">
-                <div class="attachment-icon">💾</div>
-                <div class="attachment-info">
-                    <div class="attachment-name">Código fuente.zip</div>
-                    <div class="attachment-size">1.2 MB</div>
-                </div>
-                <a href="#" class="download-btn">Descargar</a>
-            </div>
+
+            <!-- [NUEVO] Contenedor para que el JS inserte aquí los adjuntos reales -->
+            <div id="attachmentsList"></div>
+
         </div>
 
         <!-- External Link Section -->

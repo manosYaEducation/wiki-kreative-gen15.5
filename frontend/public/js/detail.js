@@ -82,6 +82,7 @@ function loadPublicationDetails() {
     // Set image
     const imageElement = document.getElementById('publicationImage');
     if (imageElement) {
+        // Ojo: esto asume que publicationImage es un <img>. Si es un <div>, no se verá.
         imageElement.src = publication.image || 'path/to/placeholder-image.png';
         imageElement.alt = publication.title || 'Publication image';
     }
@@ -139,18 +140,65 @@ function loadPublicationDetails() {
             catch (e) {
                 console.error('Error al parsear tags:', e);
                 tags = [];
+            }
         }
+
+        tagsContainer.innerHTML = Array.isArray(tags) && tags.length > 0
+            ? tags.map(tag => `<div class="tag">${tag}</div>`).join('')
+            : '<div class="tag">Sin etiquetas</div>';
     }
 
-    tagsContainer.innerHTML = Array.isArray(tags) && tags.length > 0
-        ? tags.map(tag => `<div class="tag">${tag}</div>`).join('')
-        : '<div class="tag">Sin etiquetas</div>';
-}
-    // Handle attachments section
+    // ============================================================
+    // [NUEVO] ADJUNTOS: mostrar links desde publication.files (JSON)
+    // ============================================================
+
     const attachmentsSection = document.getElementById('attachmentsSection');
-    if (attachmentsSection) {
-        attachmentsSection.style.display = publication.hasAttachments ? 'block' : 'none';
+    const attachmentsList = document.getElementById('attachmentsList'); 
+
+    let files = [];
+    try {
+        if (publication.files) {
+            files = (typeof publication.files === 'string')
+                ? JSON.parse(publication.files)
+                : publication.files; // 
+        }
+    } catch (e) {
+        console.error('Error al parsear publication.files:', e);
+        files = [];
     }
+
+    // Mostrar/ocultar sección
+    if (attachmentsSection) {
+        attachmentsSection.style.display = (Array.isArray(files) && files.length > 0) ? 'block' : 'none';
+    }
+
+    // Renderizar links
+    if (attachmentsList) {
+        attachmentsList.innerHTML = '';
+
+        if (Array.isArray(files) && files.length > 0) {
+            files.forEach((path) => {
+                const a = document.createElement('a');
+                a.href = path;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+
+                // Mostrar solo el nombre del archivo (mantiene el mismo comportamiento al hacer clic)
+                const fileName = String(path).split('/').pop() || String(path);
+                a.textContent = fileName;
+
+                const row = document.createElement('div'); // o <li> si usas <ul>
+                row.className = 'attachment-item'; // opcional, para CSS
+                row.appendChild(a);
+
+                attachmentsList.appendChild(row);
+            });
+        } else {
+            // (sin cambios) si no hay archivos, no renderiza nada
+        }
+    }
+    
+    // ============================================================
 
     // Handle external link section
     const externalLinkSection = document.getElementById('externalLinkSection');
