@@ -116,16 +116,22 @@ function loadPublicationDetails() {
         titleElement.textContent = publication.title || 'Sin título';
     }
 
+   
+
     // Set description
     const descriptionElement = document.getElementById('publicationDescription');
     if (descriptionElement) {
-        descriptionElement.textContent = publication.description || 'Sin descripción';
+        const description = publication.description || 'Sin descripción';
+        descriptionElement.innerHTML = linkverify(description);//verifica si hay links y los convierte en enlaces clickeables
     }
+
 
     // Set content
     const contentElement = document.getElementById('content-section');
     if (contentElement) {
-        contentElement.textContent = publication.content || 'Sin contenido';
+        const content = publication.content || 'Sin contenido';
+        contentElement.innerHTML = linkverify(content);//verifica si hay links y los convierte en enlaces clickeables
+       
     }
 
     // Load tags
@@ -217,6 +223,18 @@ function loadPublicationDetails() {
         ? `${publication.title} - Wiki KREATIVE`
         : 'Publicación - Wiki KREATIVE';
 }
+
+//verifica si hay un link en el texto y lo convierte en un enlace clickeable
+function linkverify(text) {
+    if (!text) return '';
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url =>
+        `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
+    );
+}
+
+
+
 
 // Theme toggle function
 function toggleTheme() {
