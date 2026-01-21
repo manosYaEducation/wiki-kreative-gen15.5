@@ -183,28 +183,9 @@ function createPublicationCard(pub) {
         <br>
         <a href="detail?id=${pub.id}" class="view-more-button">Ver más</a>
     </div>
-`;
-
-    /*
-    card.innerHTML = `
-        ${dropdownMenu}
-        <div class="card-image">
-            <img src="${imageUrl}" alt="${pub.title}">
-        </div>
-        <div class="card-content">
-            <div class="card-category">${getCategoryName(pub.area)}</div>
-            <h3 class="card-title">${pub.title}</h3>
-            <p class="card-description">${pub.description}</p>
-            <div class="card-footer">
-                <div class="card-tags">
-                    ${tags.slice(0, 2).map(tag => `<span class="card-tag">${tag}</span>`).join('')}
-                    ${tags.length > 2 ? `<span class="card-tag">+${tags.length - 2}</span>` : ''}
-                </div>
-                <a href="detail?id=${pub.id}" class="view-more-button">Ver más</a>
-            </div>
-        </div>
     `;
-    */
+
+    
     return card;
 }
 
