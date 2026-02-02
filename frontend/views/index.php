@@ -37,7 +37,6 @@
     <section class="search-section">
         <div class="search-container">
             <input type="text" class="search-input" placeholder="Buscar publicaciones..." id="searchInput">
-            <button class="search-button" onclick="performSearch()">🔍</button>
         </div>
     </section>
 
