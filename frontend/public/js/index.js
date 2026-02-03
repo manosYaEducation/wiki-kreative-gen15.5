@@ -578,7 +578,7 @@ async function showConfirm(message) {
         confirmModal.className = 'modal confirm-modal show'; // Add 'show' class immediately
         confirmModal.innerHTML = `
             <div class="modal-content">
-                <p style="margin-bottom: 20px; font-size: 16px; color: #333;">${message}</p>
+                <p class="confirm-modal-text">${message}</p>
                 <div style="display: flex; justify-content: flex-end; gap: 12px;">
                     <button class="btn btn-primary confirm-yes">Sí</button>
                     <button class="btn btn-secondary confirm-no">No</button>
