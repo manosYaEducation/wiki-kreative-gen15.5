@@ -885,9 +885,9 @@ body.dark-mode .page-number:hover {
     background-color: white;
     border-radius: 16px;
     padding: 0;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
+    width: 95%;
+    max-width: 900px;
+    max-height: 95vh;
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     animation: modalSlideIn 0.3s ease-out;
@@ -991,6 +991,11 @@ body.dark-mode .form-select {
     color: #E0E0E0;
 }
 
+body.dark-mode .form-input::placeholder,
+body.dark-mode .form-textarea::placeholder {
+    color: #9ca3af;
+}
+
 .form-input:focus, .form-textarea:focus, .form-select:focus {
     outline: none;
     border-color: #4CAF50;
@@ -1003,9 +1008,10 @@ body.dark-mode .form-select:focus {
     background-color: #1E1E1E;
 }
 
+
 .form-textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 250px;
 }
 
 .image-upload-area {
@@ -1147,8 +1153,16 @@ body.dark-mode .tags-input-container {
     color: #333;
 }
 
+.tag-input::placeholder {
+    color: #9ca3af;
+}
+
 body.dark-mode .tag-input {
     color: #E0E0E0;
+}
+
+body.dark-mode .tag-input::placeholder {
+    color: #9ca3af;
 }
 
 .modal-footer {
@@ -1770,5 +1784,68 @@ body.dark-mode .confirm-modal .modal-content p {
 .confirm-modal .btn {
     padding: 10px 20px;
     font-size: 14px;
+}
+
+/* Estilos para elementos de archivos en modo oscuro */
+.existing-files-list {
+    color: #E0E0E0;
+}
+
+body.dark-mode .existing-files-list {
+    background-color: #2A2A2A !important;
+    color: #E0E0E0;
+}
+
+.file-item {
+    color: #333;
+    border-left: 3px solid #007bff;
+}
+
+body.dark-mode .file-item {
+    background-color: #1E1E1E !important;
+    color: #E0E0E0;
+    border-left-color: #4CAF50;
+}
+
+/* Estilos para botón de eliminar archivo */
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+    padding: 6px 12px;
+    font-size: 13px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+
+body.dark-mode .btn-danger {
+    background-color: #dc2626;
+}
+
+body.dark-mode .btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+/* Estilos generales para mejor visibilidad */
+body.dark-mode p {
+    color: #E0E0E0;
+}
+
+body.dark-mode label {
+    color: #E0E0E0;
+}
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+    color: #E0E0E0;
 }
 /* Estilos de modal de confirmacion para eliminar publicacion */

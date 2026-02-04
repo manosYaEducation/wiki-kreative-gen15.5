@@ -259,6 +259,17 @@ class TutorialController
 
         $imagePath = $tutorial['image']; // Imagen actual
 
+        // Verifica si se debe eliminar la imagen actual
+        if (!empty($data['deleteImage']) && $data['deleteImage'] === '1') {
+            if (!empty($imagePath)) {
+                $fullOldImagePath = $_SERVER['DOCUMENT_ROOT'] . $imagePath;
+                if (file_exists($fullOldImagePath)) {
+                    unlink($fullOldImagePath);
+                }
+            }
+            $imagePath = null; // Establecer a null para indicar que no hay imagen
+        }
+
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $newImagePath = $this->handleImageUpload($_FILES['image']);
             if (!$newImagePath) {
@@ -283,15 +294,34 @@ class TutorialController
             $data['tags'] = json_decode($data['tags'], true) ?? $data['tags'];
         }
 
-        // [NUEVO] Adjuntos en UPDATE:
-        // - Si subes nuevos adjuntos, se agregan a los existentes (merge).
-        // - Si no subes nada, se conserva lo existente.
+        
+        //Si subes nuevos adjuntos, se agregan a los existentes (merge).
+        //Si no subes nada, se conserva lo existente.
+        //Si eliminas archivos, se remueven de la lista.
         $existingFiles = [];
         if (!empty($tutorial['files'])) {
             $decoded = json_decode($tutorial['files'], true);
             if (is_array($decoded)) {
                 $existingFiles = $decoded;
             }
+        }
+
+        // Procesar eliminación de archivos
+        $filesToDelete = [];
+        if (!empty($data['deleteFiles'])) {
+            $filesToDelete = json_decode($data['deleteFiles'], true) ?? [];
+        }
+        
+        // Eliminar archivos del servidor y de la lista
+        foreach ($filesToDelete as $filePath) {
+            $fullFilePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
+            if (file_exists($fullFilePath)) {
+                unlink($fullFilePath);
+            }
+            // Remover del array de archivos existentes
+            $existingFiles = array_values(array_filter($existingFiles, function($f) use ($filePath) {
+                return $f !== $filePath;
+            }));
         }
 
         $newFiles = [];
@@ -311,7 +341,7 @@ class TutorialController
         if ($success) {
             $this->sendJsonResponse(['message' => 'Tutorial updated successfully']);
         } else {
-            // Si el UPDATE falla, limpiamos solo los archivos nuevos que se subieron ahora
+            // Si falla, se limpia solo los archivos nuevos que se subieron ahora
             $this->cleanupUploadedFiles($newFiles);
 
             $this->sendJsonResponse(['error' => 'Failed to update tutorial'], 500);
