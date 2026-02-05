@@ -1,10 +1,10 @@
-//const API_BASE_URL = '/wiki-kreative-gen15.5/backend/public';
+//const API_BASE_URL = '/backend';
 //verifica si el proyecto esta en Local o Subido
 let BASE_PATH = window.location.origin;
 if (window.location.pathname.startsWith('/wiki-kreative')) {
     BASE_PATH='/wiki-kreative-gen15.5/backend/public';
 } else {
-    BASE_PATH='/backend/public';
+    BASE_PATH='/backend';
 }
 
 const API_BASE_URL = BASE_PATH;

@@ -48,4 +48,16 @@ class Database
     {
         return $this->conn;
     }
+    
+    public static function testConnection(): array
+    {
+        try {
+            $db = self::getInstance();
+            $conn = $db->getConnection();
+            $stmt = $conn->query("SELECT 1");
+            return ['success' => true, 'message' => 'Conexión exitosa'];
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
 }
