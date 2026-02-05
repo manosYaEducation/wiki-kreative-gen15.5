@@ -5,10 +5,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Equipo Profesional Gen10 Alpha Docere</title>
+
     <link rel="icon" href="../assets/img/letra-k (1).png" type="image/x-icon">
     <link href="../public/css/admin/index-admin.css" rel="stylesheet" />
     <link rel="stylesheet" href="public/css/admin/index-admin.css">
+
+    <!-- CSS base -->
     <link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative.css">
+    <!-- CSS feedback (toasts + validación) -->
+    <link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative-feedback.css">
+    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" href="./assets/img/letra-k (1).png" type="image/x-icon">
@@ -20,8 +27,8 @@
 
 <body>
     <?php require_once("components/header.php"); ?>
-    <section class="ambientes-section" id="enlaces">
 
+    <section class="ambientes-section" id="enlaces">
         <div class="enlaces">
             <ul class="link-buttons">
                 <li><a class="button-social" href="enlace.php?destino=discord" target="_blank"><i class="fab fa-discord"></i> Discord</a></li>
@@ -158,7 +165,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="submitUpload()">Publicar</button>
+                <button type="button" class="btn btn-primary" id="uploadSubmitBtn" onclick="submitUpload()">Publicar</button>
             </div>
         </div>
     </div>
@@ -191,10 +198,12 @@
                         <label class="form-label">Descripción *</label>
                         <textarea class="form-textarea" id="editDescription" required></textarea>
                     </div>
+
                     <div class="form-group">
                         <label class="form-label">Contenido *</label>
                         <textarea class="form-textarea" id="editContent" required placeholder="Escribe el contenido completo del tutorial..."></textarea>
                     </div>
+
                     <div class="form-group">
                         <label class="form-label">Área *</label>
                         <select class="form-select" id="editCategory" required>
@@ -226,13 +235,17 @@
                     </div>
                 </form>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="submitEdit()">Guardar Cambios</button>
+                <button type="button" class="btn btn-primary" id="editSubmitBtn" onclick="submitEdit()">Guardar Cambios</button>
             </div>
         </div>
     </div>
+    <script src="public/js/wiki-kreative-feedback.js"></script>
+
     <script src="public/js/index.js"></script>
+    
 </body>
 
 </html>
