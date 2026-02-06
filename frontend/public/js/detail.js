@@ -173,12 +173,10 @@ function loadPublicationDetails() {
         });
         
         // Insertar antes de las etiquetas
-        const tagsSection = document.querySelector('.tags-section');
-        if (tagsSection) {
-            tagsSection.parentNode.insertBefore(videosSection, tagsSection);
-        } else {
-            document.querySelector('.publication-content').appendChild(videosSection);
-        }
+            const publicationContent = document.querySelector('.publication-content');
+            if (publicationContent) {
+                publicationContent.appendChild(videosSection);
+            }
     }
 
     // Load tags
