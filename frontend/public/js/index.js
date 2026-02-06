@@ -372,97 +372,125 @@ function closeEditModal() {
 
 // Form submission
 async function submitUpload() {
-    const title = document.getElementById('uploadTitle').value;
-    const description = document.getElementById('uploadDescription').value;
-    const area = document.getElementById('uploadCategory').value;
-    const content = document.getElementById('uploadContent').value;
-    const imageInput = document.getElementById('uploadImage');
+    const btn = document.getElementById('uploadSubmitBtn');
 
-    const tags = Array.from(document.querySelectorAll('#uploadTagsDisplay .tag-chip'))
-        .map(chip => chip.textContent.replace('×', '').trim());
+    return WKFeedback.withButtonLock(btn, async () => {
+        // Validación bonita (toast + borde rojo)
+        const ok = WKFeedback.validateRequired([
+            { id: 'uploadTitle', label: 'Título' },
+            { id: 'uploadDescription', label: 'Descripción' },
+            { id: 'uploadCategory', label: 'Área' },
+            { id: 'uploadContent', label: 'Contenido' },
+        ]);
+        if (!ok) return;
 
-    if (!title || !description || !area || !content) {
-        showError('Por favor completa todos los campos obligatorios.');
-        return;
-    }
+        const title = document.getElementById('uploadTitle').value;
+        const description = document.getElementById('uploadDescription').value;
+        const area = document.getElementById('uploadCategory').value;
+        const content = document.getElementById('uploadContent').value;
+        const imageInput = document.getElementById('uploadImage');
+        const link = document.getElementById('uploadLink')?.value || "";
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('area', area);
-    formData.append('content', content);
-    formData.append('tags', JSON.stringify(tags));
-    formData.append('lastEditor', 'user123');
-    formData.append('creator', 'user123');
+        const tags = Array.from(document.querySelectorAll('#uploadTagsDisplay .tag-chip'))
+            .map(chip => chip.textContent.replace('×', '').trim());
 
-    if (imageInput.files[0]) {
-        formData.append('image', imageInput.files[0]);
-    }
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('area', area);
+        formData.append('content', content);
+        formData.append('tags', JSON.stringify(tags));
+        formData.append('lastEditor', 'user123');
+        formData.append('creator', 'user123');
 
-    // [NUEVO] Adjuntos (files) - múltiple (va DESPUÉS de crear formData)
-    const filesInput = document.getElementById('uploadFiles');
-    if (filesInput && filesInput.files && filesInput.files.length > 0) {
-        for (const file of filesInput.files) {
-            formData.append('files[]', file);
+        if (link.trim()) {
+            // no rompe si backend lo ignora
+            formData.append('externalLink', link.trim());
         }
-    }
 
-    try {
-        await makeApiCall('tutorial/create', 'POST', formData, true);
-        showSuccess('Tutorial creado exitosamente');
-        closeUploadModal();
-        await fetchPublications();
-    } catch (error) {
-        console.error('Error creating tutorial:', error);
-    }
+        if (imageInput.files[0]) {
+            formData.append('image', imageInput.files[0]);
+        }
+
+        const filesInput = document.getElementById('uploadFiles');
+        if (filesInput && filesInput.files && filesInput.files.length > 0) {
+            for (const file of filesInput.files) {
+                formData.append('files[]', file);
+            }
+        }
+
+        try {
+            await makeApiCall('tutorial/create', 'POST', formData, true);
+            showSuccess('Tutorial creado exitosamente');
+            closeUploadModal();
+            await fetchPublications();
+        } catch (error) {
+            console.error('Error creating tutorial:', error);
+            showError(error?.message || 'No se pudo crear el tutorial');
+        }
+    }, { loadingText: "Publicando..." });
 }
+
 
 
 async function submitEdit() {
-    const title = document.getElementById('editTitle').value;
-    const description = document.getElementById('editDescription').value;
-    const area = document.getElementById('editCategory').value;
-    const content = document.getElementById('editContent').value;
-    const imageInput = document.getElementById('editImage');
+    const btn = document.getElementById('editSubmitBtn');
 
-    const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
-        .map(chip => chip.textContent.replace('×', '').trim());
+    return WKFeedback.withButtonLock(btn, async () => {
+        const ok = WKFeedback.validateRequired([
+            { id: 'editTitle', label: 'Título' },
+            { id: 'editDescription', label: 'Descripción' },
+            { id: 'editCategory', label: 'Área' },
+            { id: 'editContent', label: 'Contenido' },
+        ]);
+        if (!ok) return;
 
-    if (!title || !description || !area || !content) {
-        showError('Por favor completa todos los campos obligatorios.');
-        return;
-    }
+        const title = document.getElementById('editTitle').value;
+        const description = document.getElementById('editDescription').value;
+        const area = document.getElementById('editCategory').value;
+        const content = document.getElementById('editContent').value;
+        const imageInput = document.getElementById('editImage');
+        const link = document.getElementById('editLink')?.value || "";
 
-    const formData = new FormData();
-    formData.append('id', editingPublicationId);
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('area', area);
-    formData.append('content', content);
-    formData.append('tags', JSON.stringify(tags));
-    formData.append('lastEditor', 'user123');
+        const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
+            .map(chip => chip.textContent.replace('×', '').trim());
 
-    if (imageInput.files[0]) {
-        formData.append('image', imageInput.files[0]);
-    }
+        const formData = new FormData();
+        formData.append('id', editingPublicationId);
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('area', area);
+        formData.append('content', content);
+        formData.append('tags', JSON.stringify(tags));
+        formData.append('lastEditor', 'user123');
 
-    // [NUEVO] Adjuntos (files) - múltiple (va DESPUÉS de crear formData)
-    const filesInput = document.getElementById('editFiles');
-    if (filesInput && filesInput.files && filesInput.files.length > 0) {
-        for (const file of filesInput.files) {
-            formData.append('files[]', file);
+        if (link.trim()) {
+            formData.append('externalLink', link.trim());
         }
-    }
 
-    try {
-        await makeApiCall('tutorial/update', 'POST', formData, true);
-        showSuccess('Tutorial actualizado exitosamente');
-        closeEditModal();
-        await fetchPublications();
-    } catch (error) {
-        console.error('Error updating tutorial:', error);
-    }
+        if (imageInput.files[0]) {
+            formData.append('image', imageInput.files[0]);
+        }
+
+        const filesInput = document.getElementById('editFiles');
+        if (filesInput && filesInput.files && filesInput.files.length > 0) {
+            for (const file of filesInput.files) {
+                formData.append('files[]', file);
+            }
+        }
+
+        try {
+            await makeApiCall('tutorial/update', 'POST', formData, true);
+            showSuccess('Tutorial actualizado exitosamente');
+            closeEditModal();
+            await fetchPublications();
+        } catch (error) {
+            console.error('Error updating tutorial:', error);
+            showError(error?.message || 'No se pudo actualizar el tutorial');
+        }
+    }, { loadingText: "Guardando..." });
 }
+
 
 
 async function deletePublication(publicationId) {
