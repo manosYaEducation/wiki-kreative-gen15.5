@@ -83,9 +83,13 @@ function loadPublicationDetails() {
     // Set image
     const imageElement = document.getElementById('publicationImage');
     if (imageElement) {
-        // Ojo: esto asume que publicationImage es un <img>. Si es un <div>, no se verá.
-        imageElement.src = publication.image || 'path/to/placeholder-image.png';
-        imageElement.alt = publication.title || 'Publication image';
+        const basePath = window.location.pathname.startsWith('/wiki-kreative')
+            ? '/wiki-kreative-gen15.5'
+            : '';
+        const imageUrl = publication.image || `${basePath}/assets/img/kreativenofondo.png`;
+        imageElement.style.backgroundImage = `url('${imageUrl}')`;
+        imageElement.style.backgroundSize = 'cover';
+        imageElement.style.backgroundPosition = 'center';
     }
 
     // Set category
@@ -133,6 +137,48 @@ function loadPublicationDetails() {
         const content = publication.content || 'Sin contenido';
         contentElement.innerHTML = linkverify(content);//verifica si hay links y los convierte en enlaces clickeables
        
+    }
+
+   
+    //Sección de videos de YouTube 
+    const youtubeVideos = new Set();
+    // Extraer videos de descripción y contenido
+    if (publication.description) {
+        extractYouTubeVideos(publication.description).forEach(id => youtubeVideos.add(id));
+    }
+    if (publication.content) {
+        extractYouTubeVideos(publication.content).forEach(id => youtubeVideos.add(id));
+    }
+    
+    // Mostrar videos si hay
+    if (youtubeVideos.size > 0) {
+        const videosSection = document.createElement('div');
+        videosSection.className = 'videos-section';
+        videosSection.innerHTML = '<h2>Sección de Videos</h2><div class="videos-container" id="videosContainer"></div>';
+        
+        const videosContainer = videosSection.querySelector('#videosContainer');
+        youtubeVideos.forEach(videoId => {
+            const iframe = document.createElement('iframe');
+            iframe.width = '100%';
+            iframe.height = '400';
+            iframe.src = `https://www.youtube.com/embed/${videoId}`;
+            iframe.frameborder = '0';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            iframe.allowFullscreen = true;
+            
+            const videoWrapper = document.createElement('div');
+            videoWrapper.className = 'video-item';
+            videoWrapper.appendChild(iframe);
+            videosContainer.appendChild(videoWrapper);
+        });
+        
+        // Insertar antes de las etiquetas
+        const tagsSection = document.querySelector('.tags-section');
+        if (tagsSection) {
+            tagsSection.parentNode.insertBefore(videosSection, tagsSection);
+        } else {
+            document.querySelector('.publication-content').appendChild(videosSection);
+        }
     }
 
     // Load tags
@@ -225,13 +271,47 @@ function loadPublicationDetails() {
         : 'Publicación - Wiki KREATIVE';
 }
 
+// Extrae el ID de video de YouTube de una URL
+function getYouTubeVideoId(url) {
+    const regExp = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+}
+
+// Verifica si una URL es de YouTube
+function isYouTubeUrl(url) {
+    return /(?:youtube\.com|youtu\.be)/.test(url);
+}
+
+// Extrae todos los videos de YouTube del texto
+function extractYouTubeVideos(text) {
+    if (!text) return [];
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const videos = [];
+    let match;
+    while ((match = urlRegex.exec(text)) !== null) {
+        const url = match[0];
+        if (isYouTubeUrl(url)) {
+            const videoId = getYouTubeVideoId(url);
+            if (videoId) videos.push(videoId);
+        }
+    }
+    return videos;
+}
+
 //verifica si hay un link en el texto y lo convierte en un enlace clickeable
 function linkverify(text) {
     if (!text) return '';
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, url =>
-        `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
-    );
+    return text.replace(urlRegex, url => {
+        // No mostrar links de YouTube como texto, se mostrarán embebidos al final
+        if (isYouTubeUrl(url)) {
+            return '';
+        }
+        const maxLength = 35;
+        const displayUrl = url.length > maxLength ? url.substring(0, maxLength) + '...' : url;
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${displayUrl}</a>`;
+    });
 }
 
 

@@ -19,6 +19,10 @@ let deleteImageOnUpdate = false;
 let filesToDeleteOnUpdate = [];
 const itemsPerPage = 9;
 
+// Utility function to remove accents
+function removeAccents(text) {
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 
 // Utility function for API calls
 async function makeApiCall(url, method = 'GET', body = null, includeFiles = false) {
@@ -60,8 +64,7 @@ async function fetchPublications() {
         renderPublications();
         updateTagsSection();
     } catch (error) {
-        console.error('Error fetching publications:', error);
-        showError('Error al cargar las publicaciones');
+        console.error('Error fetching al publicaciones desde la Base de Datos, no se esta recibiendo JSON:', error);
     }
 }
 
@@ -87,10 +90,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // Setup event listeners
 function setupEventListeners() {
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            performSearch();
-        }
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        performSearch();
     });
 
     window.addEventListener('click', function(e) {
@@ -214,10 +215,12 @@ function getFilteredPublications() {
                 : []);
 
         const matchesCategory = currentFilter === 'todas' || pub.area === currentFilter;
+        const searchTermNormalized = removeAccents(currentSearchTerm.toLowerCase());
         const matchesSearch = currentSearchTerm === '' ||
-            pub.title.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-            pub.description.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-            tags.some(tag => tag.toLowerCase().includes(currentSearchTerm.toLowerCase()));
+            //remueven los acentos para comparar
+            removeAccents(pub.title.toLowerCase()).includes(searchTermNormalized) ||
+            removeAccents(pub.description.toLowerCase()).includes(searchTermNormalized) ||
+            tags.some(tag => removeAccents(tag.toLowerCase()).includes(searchTermNormalized));
         const matchesTag = currentTagFilter === '' || tags.includes(currentTagFilter);
 
         return matchesCategory && matchesSearch && matchesTag;
@@ -345,7 +348,9 @@ function closeUploadModal() {
 }
 
 function openEditModal(publicationId) {
-    const publication = publications.find(p => p.id === publicationId);
+    //const publication = publications.find(p => p.id === publicationId);
+    const publication = publications.find(p => String(p.id) === String(publicationId));
+    
     if (!publication) return;
     editingPublicationId = publicationId;
     deleteImageOnUpdate = false;
@@ -535,7 +540,7 @@ async function deletePublication(publicationId) {
         await fetchPublications();
     } catch (error) {
         console.error('Error deleting tutorial:', error);
-        showError(`Error al eliminar la publicación: ${error.message}`);
+        // Error ya mostrado por makeApiCall()
     } finally {
         document.querySelectorAll('.dropdown-menu').forEach(menu => {
             menu.classList.remove('show');
