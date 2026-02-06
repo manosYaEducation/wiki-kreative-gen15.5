@@ -15,6 +15,8 @@ let currentFilter = 'todas';
 let currentSearchTerm = '';
 let currentTagFilter = '';
 let editingPublicationId = null;
+let deleteImageOnUpdate = false;
+let filesToDeleteOnUpdate = [];
 const itemsPerPage = 9;
 
 
@@ -346,6 +348,8 @@ function openEditModal(publicationId) {
     const publication = publications.find(p => p.id === publicationId);
     if (!publication) return;
     editingPublicationId = publicationId;
+    deleteImageOnUpdate = false;
+    filesToDeleteOnUpdate = [];
     document.getElementById('editTitle').value = publication.title;
     document.getElementById('editDescription').value = publication.description;
     document.getElementById('editCategory').value = publication.area;
@@ -356,6 +360,18 @@ function openEditModal(publicationId) {
     tags.forEach(tag => {
         addTagToDisplay(tag, 'edit');
     });
+    
+    // Mostrar botón de eliminar imagen si existe una imagen actual
+    const deleteImageButton = document.getElementById('deleteImageButton');
+    if (publication.image) {
+        deleteImageButton.style.display = 'block';
+    } else {
+        deleteImageButton.style.display = 'none';
+    }
+    
+    // Mostrar archivos existentes
+    displayExistingFiles(publication.files);
+    
     document.getElementById('editModal').classList.add('show');
     document.body.style.overflow = 'hidden';
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -455,18 +471,21 @@ async function submitEdit() {
         const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
             .map(chip => chip.textContent.replace('×', '').trim());
 
-        const formData = new FormData();
-        formData.append('id', editingPublicationId);
-        formData.append('title', title);
-        formData.append('description', description);
-        formData.append('area', area);
-        formData.append('content', content);
-        formData.append('tags', JSON.stringify(tags));
-        formData.append('lastEditor', 'user123');
+    if (!title || !description || !area || !content) {
+        showError('Por favor completa todos los campos obligatorios.');
+        return;
+    }
 
-        if (link.trim()) {
-            formData.append('externalLink', link.trim());
-        }
+    const formData = new FormData();
+    formData.append('id', editingPublicationId);
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('area', area);
+    formData.append('content', content);
+    formData.append('tags', JSON.stringify(tags));
+    formData.append('lastEditor', 'user123');
+    formData.append('deleteImage', deleteImageOnUpdate ? '1' : '0');
+    formData.append('deleteFiles', JSON.stringify(filesToDeleteOnUpdate));
 
         if (imageInput.files[0]) {
             formData.append('image', imageInput.files[0]);
@@ -569,7 +588,101 @@ function setupImageUpload(modalType) {
     });
 }
 
-// Reset forms
+//Display de archivos existentes en el modal de edición
+function displayExistingFiles(filesData) {
+    const container = document.getElementById('editExistingFiles');
+    container.innerHTML = '';
+    
+    if (!filesData) {
+        return;
+    }
+    
+    let files = [];
+    if (typeof filesData === 'string') {
+        try {
+            files = JSON.parse(filesData);
+        } catch (e) {
+            files = [];
+        }
+    } else if (Array.isArray(filesData)) {
+        files = filesData;
+    }
+    
+    if (!files || files.length === 0) {
+        return;
+    }
+    
+    const filesList = document.createElement('div');
+    filesList.className = 'existing-files-list';
+    
+    
+    const title = document.createElement('p');
+    
+    title.style.fontWeight = 'bold';
+    title.style.margin = '0 0 10px 0';
+    filesList.appendChild(title);
+    
+    files.forEach((filePath, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.style.display = 'flex';
+        fileItem.style.justifyContent = 'space-between';
+        fileItem.style.alignItems = 'center';
+        fileItem.style.padding = '8px';
+        fileItem.style.backgroundColor = 'white';
+        fileItem.style.marginBottom = '5px';
+        fileItem.style.borderRadius = '3px';
+        fileItem.style.borderLeft = '3px solid #007bff';
+        
+        const nameSpan = document.createElement('span');
+        const fileName = filePath.split('/').pop();
+        nameSpan.textContent = fileName;
+        nameSpan.style.flex = '1';
+        nameSpan.style.wordBreak = 'break-word';
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn btn-sm btn-danger';
+        deleteBtn.textContent = 'Eliminar';
+        deleteBtn.style.marginLeft = '10px';
+        deleteBtn.style.padding = '4px 8px';
+        deleteBtn.style.fontSize = '12px';
+        deleteBtn.onclick = (e) => {
+            e.preventDefault();
+            deleteExistingFile(filePath, index);
+        };
+        
+        fileItem.appendChild(nameSpan);
+        fileItem.appendChild(deleteBtn);
+        filesList.appendChild(fileItem);
+    });
+    
+    container.appendChild(filesList);
+}
+
+//Eliminar archivo existente
+function deleteExistingFile(filePath, index) {
+    if (!filesToDeleteOnUpdate.includes(filePath)) {
+        filesToDeleteOnUpdate.push(filePath);
+    }
+    
+    const fileItems = document.querySelectorAll('.file-item');
+    if (fileItems[index]) {
+        fileItems[index].style.opacity = '0.5';
+        fileItems[index].style.textDecoration = 'line-through';
+    }
+    
+    showSuccess('Archivo marcado para eliminar');
+}
+
+
+function deleteCurrentImage() {
+    deleteImageOnUpdate = true;
+    document.getElementById('editImagePreview').style.display = 'none';
+    document.getElementById('deleteImageButton').style.display = 'none';
+    showSuccess('Imagen marcada para eliminar');
+}
+
 function resetUploadForm() {
     document.getElementById('uploadForm').reset();
     document.getElementById('uploadTagsDisplay').innerHTML = '';
@@ -580,6 +693,9 @@ function resetEditForm() {
     document.getElementById('editForm').reset();
     document.getElementById('editTagsDisplay').innerHTML = '';
     document.getElementById('editImagePreview').style.display = 'none';
+    document.getElementById('editExistingFiles').innerHTML = '';
+    deleteImageOnUpdate = false;
+    filesToDeleteOnUpdate = [];
 }
 
 // User feedback functions

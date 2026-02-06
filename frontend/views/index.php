@@ -192,6 +192,9 @@
                             <input type="file" id="editImage" accept="image/*" style="display: none;">
                             <img id="editImagePreview" class="image-preview" style="display: none;">
                         </div>
+                        <button type="button"  id="deleteImageButton" onclick="deleteCurrentImage()" style="margin-top: 10px;">
+                            Eliminar imagen actual
+                        </button>
                     </div>
 
                     <div class="form-group">
@@ -225,7 +228,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Archivo adjunto (opcional)</label>
+                        <label class="form-label">Archivo(s) adjunto(s)</label>
+                        <div id="editExistingFiles" class="existing-files-container" style="margin-bottom: 15px;"></div>
                         <input id="editFiles" type="file" name="files[]" multiple>
                     </div>
 
