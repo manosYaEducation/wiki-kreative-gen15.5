@@ -402,7 +402,7 @@ body.dark-mode .filter-item:hover {
 
 /* Tags Section */
 .tags-section {
-    min-height: 300px;
+    min-height: auto;
     background-color: white;
     border-radius: 12px;
     overflow: hidden;
@@ -1754,16 +1754,16 @@ body.dark-mode .back-to-site:hover {
 
 body.dark-mode .confirm-modal .modal-content {
     background-color: #1E1E1E;
-    color: #E0E0E0;
 }
 
-.confirm-modal .modal-content p {
+.confirm-modal-text {
     margin-bottom: 20px;
     font-size: 16px;
     color: #333;
+    transition: color 0.3s;
 }
 
-body.dark-mode .confirm-modal .modal-content p {
+body.dark-mode .confirm-modal-text {
     color: #E0E0E0;
 }
 
