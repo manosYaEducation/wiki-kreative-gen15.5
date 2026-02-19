@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative.css">
     <!-- CSS feedback (toasts + validación) -->
     <link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative-feedback.css">
+    <!-- CSS footer -->
+    <link rel="stylesheet" href="public/css/footer/footer.css">
     
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -248,6 +250,7 @@
     <script src="public/js/wiki-kreative-feedback.js"></script>
 
     <script src="public/js/index.js"></script>
+    <?php require_once("components/footer-index.php"); ?>
     
 </body>
 
