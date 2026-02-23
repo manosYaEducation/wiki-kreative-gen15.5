@@ -405,6 +405,14 @@ async function submitUpload() {
         ]);
         if (!ok) return;
 
+           // ========== CONFIRMACIÓN ANTES DE CREAR ==========
+        const confirmed = await showConfirm('¿Estás seguro de que quieres crear esta publicación?');
+        if (!confirmed) {
+            console.log('Creación cancelada por el usuario.');
+            return;
+        }
+        // =================================================
+
         const title = document.getElementById('uploadTitle').value;
         const description = document.getElementById('uploadDescription').value;
         const area = document.getElementById('uploadCategory').value;
