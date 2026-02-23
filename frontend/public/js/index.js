@@ -551,6 +551,7 @@ async function deletePublication(publicationId) {
 // Tag input functionality
 function setupTagInput(modalType) {
     const tagInput = document.getElementById(`${modalType}TagInput`);
+    tagInput.placeholder = "Enter para guardar";
     tagInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && this.value.trim()) {
             e.preventDefault();
