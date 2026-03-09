@@ -1,7 +1,10 @@
 Options -MultiViews
 RewriteEngine On
 
+
+
 # El GPS del proyecto: le dice a Apache dónde empieza la raíz virtual
+
 RewriteBase /wiki-kreative-gen15.5/backend/public/
 
 

@@ -2,6 +2,9 @@
 
 namespace App\Backend;
 
+// Importamos el guardia
+use App\Backend\Middleware\AuthMiddleware;
+
 class Router
 {
     private $routes;
@@ -28,6 +31,17 @@ class Router
 
         foreach ($this->routes as $path => $handler) {
             if ($path === $route && $handler['httpMethod'] === $requestMethod) {
+                
+                // --- NUEVO: LÓGICA DE SEGURIDAD (Middleware) ---
+                if (isset($handler['auth']) && $handler['auth'] === true) {
+                    $middleware = new AuthMiddleware();
+                    // El guardia revisa el token. Si falla, él mismo corta la ejecución.
+                    $userData = $middleware->checkToken();
+                    
+                    // Opcional: Podrías guardar $userData para usarlo después
+                }
+                // -----------------------------------------------
+
                 $controllerClass = $handler['controller'];
                 $methodName = $handler['method'];
 
@@ -37,7 +51,7 @@ class Router
                         $controller->$methodName();
                         return;
                     } else {
-                        $this->sendJsonResponse(['success' => false, 'message' => 'Método no encontrado en el controlador.'], 404);
+                        $this->sendJsonResponse(['success' => false, 'message' => 'Método no encontrado.'], 404);
                     }
                 } else {
                     $this->sendJsonResponse(['success' => false, 'message' => 'Controlador no encontrado.'], 404);
@@ -45,7 +59,7 @@ class Router
             }
         }
 
-        $this->sendJsonResponse(['success' => false, 'message' => 'Ruta no encontrada o método no permitido.'], 404);
+        $this->sendJsonResponse(['success' => false, 'message' => 'Ruta no encontrada.'], 404);
     }
 
     private function sendJsonResponse($data, $statusCode = 200)

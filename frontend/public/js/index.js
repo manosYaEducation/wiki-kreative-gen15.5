@@ -4,7 +4,7 @@ let BASE_PATH = window.location.origin;
 if (window.location.pathname.startsWith('/wiki-kreative')) {
     BASE_PATH='/wiki-kreative-gen15.5/backend/public';
 } else {
-    BASE_PATH='/backend';
+    BASE_PATH='/backend/public';
 }
 
 const API_BASE_URL = BASE_PATH;
@@ -29,11 +29,15 @@ async function makeApiCall(url, method = 'GET', body = null, includeFiles = fals
     const headers = {
         'Accept': 'application/json',
     };
-    const options = { method, headers };
+    const options = { 
+        method, 
+        headers,
+        credentials: 'include' 
+    };
     
     if (body) {
         if (includeFiles) {
-            options.body = body; // FormData for file uploads
+            options.body = body;
         } else {
             headers['Content-Type'] = 'application/json';
             options.body = JSON.stringify(body);
@@ -42,13 +46,28 @@ async function makeApiCall(url, method = 'GET', body = null, includeFiles = fals
 
     try {
         const response = await fetch(`${API_BASE_URL}/${url}`, options);
+        
+        // --- PASO 1: SILENCIAR EL ERROR 401 ---
+        if (response.status === 401) {
+            console.warn("Acceso no autorizado o sesión expirada (401).");
+            // Devolvemos un objeto vacío para que el código no se rompa,
+            // pero NO lanzamos el "throw new Error" que activa el cartel rosa.
+            return { success: false, data: [] }; 
+        }
+
         const data = await response.json();
+
         if (!response.ok) {
             throw new Error(data.error || `Error del servidor: ${response.status}`);
         }
         return data;
+
     } catch (error) {
-        showError(error.message);
+        // --- PASO 2: FILTRAR EL CARTEL ROSA ---
+        // Solo mostramos el error visual si NO es un error de autorización (401)
+        if (!error.message.includes('401')) {
+            showError(error.message);
+        }
         throw error;
     }
 }
@@ -56,15 +75,23 @@ async function makeApiCall(url, method = 'GET', body = null, includeFiles = fals
 // Fetch all publications
 async function fetchPublications() {
     try {
-        publications = await makeApiCall('tutorial/getAll');
-        publications = publications.map(pub => ({
+        const result = await makeApiCall('tutorial/getAll');
+        
+        // AGREGAR ESTA VALIDACIÓN:
+        // Si result no existe o no es una lista (Array), nos detenemos silenciosamente
+        if (!result || !Array.isArray(result)) {
+            console.warn('No se recibieron publicaciones o la sesión expiró.');
+            return; 
+        }
+
+        publications = result.map(pub => ({
             ...pub,
             tags: Array.isArray(pub.tags) ? pub.tags : (pub.tags ? JSON.parse(pub.tags) : [])
         }));
         renderPublications();
         updateTagsSection();
     } catch (error) {
-        console.error('Error fetching al publicaciones desde la Base de Datos, no se esta recibiendo JSON:', error);
+        // El error ya se maneja en makeApiCall o se silencia allí
     }
 }
 
@@ -76,7 +103,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.body.classList.toggle('dark-mode', currentTheme === 'dark');
     const logo = document.querySelector('.icon');
     if (logo) {
-        logo.src = currentTheme === 'dark' ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
+        logo.src = currentTheme === 'dark' ? '/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png' 
+        : '/wiki-kreative-gen15.5/assets/img/kreativenofondo.png';;
     }
     document.querySelectorAll('.theme-toggle').forEach(btn => {
         btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
@@ -134,23 +162,33 @@ function renderPublications() {
 function createPublicationCard(pub) {
     const card = document.createElement('div');
     card.className = 'card';
-    // Ensure tags is an array, default to empty array if null or undefined
+    card.dataset.id = pub.id;
+    
+    // Ensure tags is an array
     const tags = Array.isArray(pub.tags) ? pub.tags : [];
-    
-    
 
-    const imageUrl = pub.image && pub.image.trim() !== '' ? pub.image : '../assets/img/kreativenofondo.png';
+    // 1. Detectamos la raíz del proyecto
+    const isLocal = window.location.pathname.startsWith('/wiki-kreative');
+    const projectRoot = isLocal ? '/wiki-kreative-gen15.5' : '';
+
+    // 2. Extraemos el nombre limpio de la imagen
+    const imageName = pub.image ? pub.image.split('/').pop() : '';
+    const cacheBuster = `?t=${Date.now()}`;
+
+    // 3. CONSTRUCCIÓN DE RUTA (Ajustada a tu XAMPP)
+    // En local: /wiki-kreative-gen15.5/public/uploads/nombre.jpg
+    // En producción: /public/uploads/nombre.jpg
+    const imageUrl = (imageName && imageName.trim() !== '') 
+    ? `${pub.image}${cacheBuster}` 
+    : `/wiki-kreative-gen15.5/assets/img/kreativenofondo.png`;
 
     
-   
-   
-    // comprobar si el usuario está logueado
+    // Comprobar si el usuario está logueado para mostrar opciones de edición
     const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' || 
                       localStorage.getItem('userLoggedIn') === 'true' ||
                       sessionStorage.getItem('userId') || 
                       localStorage.getItem('userId');
     
-    // mostrar solo si esta logueado para editar y eliminar publiaciones
     const dropdownMenu = isLoggedIn ? `
         <div class="card-dropdown">
             <button class="dropdown-button" onclick="toggleDropdown(event, ${pub.id})">⋮</button>
@@ -161,34 +199,32 @@ function createPublicationCard(pub) {
         </div>
     ` : '';
 
-    //alt="${pub.title}
-    
+    // Construcción del HTML de la tarjeta
     card.innerHTML = `
-    ${dropdownMenu}
-    
-    <div class="card-image">
-        <img src="${imageUrl}" alt="${pub.title}">
-       
-        <span class="card-badge">${getCategoryName(pub.area)}</span>
-    </div>
+        ${dropdownMenu}
+        
+        <div class="card-image">
+            <img src="${imageUrl}" 
+                 alt="${pub.title}" 
+                 onerror="this.src='${projectRoot}/assets/img/kreativenofondo.png'">
+            <span class="card-badge">${getCategoryName(pub.area)}</span>
+        </div>
 
-    <div class="card-body">
-        <h3 class="card-title">${pub.title}</h3>
-        <p class="card-description">${pub.description}</p>
+        <div class="card-body">
+            <h3 class="card-title">${pub.title}</h3>
+            <p class="card-description">${pub.description}</p>
 
-        <div class="card-footer">
+            <div class="card-footer">
                 <div class="card-tags">
                     ${tags.slice(0, 3).map(tag => `<span class="card-tag">${tag}</span>`).join('')}
-                    ${tags.length > 2 ? `<span class="card-tag">+${tags.length - 2}</span>` : ''}
+                    ${tags.length > 3 ? `<span class="card-tag">+${tags.length - 3}</span>` : ''}
                 </div>
-                
+            </div>
+            <br>
+            <a href="detail?id=${pub.id}" class="view-more-button">Ver más</a>
         </div>
-        <br>
-        <a href="detail?id=${pub.id}" class="view-more-button">Ver más</a>
-    </div>
     `;
 
-    
     return card;
 }
 
@@ -368,10 +404,24 @@ function openEditModal(publicationId) {
     
     // Mostrar botón de eliminar imagen si existe una imagen actual
     const deleteImageButton = document.getElementById('deleteImageButton');
+    const editImagePreview = document.getElementById('editImagePreview'); // <--- Asegúrate de tener este ID
+
     if (publication.image) {
         deleteImageButton.style.display = 'block';
+
+        // --- TRUCO ROMPE-CACHÉ AQUÍ ---
+        if (editImagePreview) {
+            // Extraemos el nombre real del archivo
+            const imageName = publication.image.split('/').pop();
+            const projectRoot = window.location.pathname.startsWith('/wiki-kreative') ? '/wiki-kreative-gen15.5' : '';
+            
+            // Le sumamos el tiempo actual para que el navegador descargue la versión nueva
+            editImagePreview.src = `${projectRoot}/public/uploads/${imageName}?t=${Date.now()}`;
+            editImagePreview.style.display = 'block';
+        }
     } else {
         deleteImageButton.style.display = 'none';
+        if (editImagePreview) editImagePreview.style.display = 'none';
     }
     
     // Mostrar archivos existentes
@@ -778,7 +828,8 @@ function toggleTheme() {
     const isDarkMode = document.body.classList.toggle('dark-mode');
     const logo = document.querySelector('.icon');
     if (logo) {
-        logo.src = isDarkMode ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
+        logo.src = isDarkMode ? '/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png' 
+        : '/wiki-kreative-gen15.5/assets/img/kreativenofondo.png';
     }
     document.querySelectorAll('.theme-toggle').forEach(btn => {
         btn.textContent = isDarkMode ? '☀️' : '🌙';
@@ -805,14 +856,15 @@ function updateUploadButton(isLoggedIn) {
     const logoutButton = document.getElementById('logoutButton');
     
     if (isLoggedIn) {
-        uploadButtonIcon.textContent = '📝';
-        uploadButtonText.textContent = 'Subir Publicación';
+        if (uploadButtonIcon) uploadButtonIcon.textContent = '📝';
+        if (uploadButtonText) uploadButtonText.textContent = 'Subir Publicación';
         if (logoutButton) {
-            logoutButton.style.display = 'flex';
+            // Usamos !important para que ningún estilo de CSS lo oculte por error
+            logoutButton.style.setProperty('display', 'flex', 'important');
         }
     } else {
-        uploadButtonIcon.textContent = '🔐';
-        uploadButtonText.textContent = 'Iniciar Sesión';
+        if (uploadButtonIcon) uploadButtonIcon.textContent = '🔐';
+        if (uploadButtonText) uploadButtonText.textContent = 'Iniciar Sesión';
         if (logoutButton) {
             logoutButton.style.display = 'none';
         }
@@ -830,24 +882,11 @@ function handleUploadButtonClick() {
         openUploadModal();
     } else {
         // Usuario no está logueado, redirigir a login
-        window.location.href = './views/login.html';
+        window.location.href = 'views/login.html';
     }
 }
 
-// Handle logout
-function handleLogout() {
-    // Limpiar todas las sesiones
-    sessionStorage.removeItem('userLoggedIn');
-    sessionStorage.removeItem('userId');
-    localStorage.removeItem('userLoggedIn');
-    localStorage.removeItem('userId');
-    
-    // Actualizar la interfaz
-    checkSessionStatus();
-    
-    // Recargar las publicaciones para ocultar los menús de edición
-    renderPublications();
-}
+
 
 // Monitor session changes (useful when user logs in from another tab/window)
 window.addEventListener('storage', function(e) {
@@ -855,3 +894,20 @@ window.addEventListener('storage', function(e) {
         checkSessionStatus();
     }
 });
+// Función para cerrar la sesión automáticamente
+function handleLogout() {
+    // 1. Borramos la cookie de inmediato
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    
+    // 2. Limpiamos los datos de sesión para que la interfaz cambie
+    sessionStorage.clear();
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userId');
+
+    console.log("Cerrando sesión...");
+
+    // 3. REDIRECCIÓN INMEDIATA
+    // Esto es lo más importante: detiene cualquier otra ejecución de JS 
+    // y recarga el sitio limpio, evitando que salte el cartel de error 401.
+    window.location.href = '/wiki-kreative-gen15.5/frontend/index.php';
+}

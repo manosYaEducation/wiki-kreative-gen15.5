@@ -1,8 +1,21 @@
-
+# SEGURIDAD
 .env
 .env.backup
+backend/.env
 
-
+# DEPENDENCIAS
 /vendor/
-/public/uploads
+backend/vendor/
+
+# ARCHIVOS TEMPORALES Y BASURA
+.DS_Store
+Thumbs.db
+
+# CARPETA DE SUBIDAS
+# Ignorar fotos en la carpeta de subidas del backend
+backend/public/uploads/*
+# Ignorar fotos en la carpeta de subidas de la raíz (por si acaso)
+public/uploads/*
+# Mantener la carpeta pero no las fotos
+!*/public/uploads/.gitkeep
 

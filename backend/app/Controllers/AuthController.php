@@ -2,57 +2,112 @@
 
 namespace App\Backend\Controllers;
 
-// Importamos la clase Database para usarla más adelante
-use App\Backend\Models\Database;
+/**
+ * 1. CARGA DE CONFIGURACIÓN "POR DETRÁS"
+ * Cargamos el archivo que lee el .env de la raíz.
+ */
+ // Cargamos las librerías de Composer (Firebase JWT)
+require_once __DIR__ . '/../../vendor/autoload.php'; 
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Exception;
+use PDO;
 
 class AuthController
 {
+    private $key;
+    private $expiry;
+
+    public function __construct() {
+        /**
+         * Usamos constant() para evitar que el editor marque error de "Undefined constant".
+         * Se obtienen los valores del .env cargados por env_loader.php
+         */
+        $this->key = defined('JWT_SECRET') ? constant('JWT_SECRET') : "WikiSecretKey_Gen15_Version2_2026_Secure";
+        $this->expiry = defined('JWT_EXPIRY') ? (int)constant('JWT_EXPIRY') : 3600;
+    }
+
     /**
-     * Esta función se encarga de recibir el usuario y contraseña
-     * y de enviar la Cookie blindada al navegador.
+     * MÉTODO DE LOGIN
+     * Valida contra la base de datos real y genera el token con el ROL.
      */
     public function login()
     {
-        // 1. Capturamos lo que el usuario escribió en el login.html
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
+        
+        if (ob_get_length()) ob_clean();
+        header('Content-Type: application/json');
 
-        // 2. Validación de prueba (Paso a paso: luego lo conectaremos a la DB)
-        if ($username === 'admin' && $password === '1234') {
+        try {
+            $username = trim($_POST['username'] ?? '');
+            $password = trim($_POST['password'] ?? '');
+
+            if (empty($username) || empty($password)) {
+                throw new Exception("Usuario y contraseña requeridos.");
+            }
+
+            // Conexión a la base de datos local
+            $pdo = new PDO("mysql:host=localhost;dbname=alphadocere_wiki;charset=utf8mb4", "root", "");
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
-            // Este es un token de ejemplo, luego generaremos uno real con JWT
-            $tokenSimulado = "TOKEN_SEGURO_WIKI_KREATIVE_123";
+            $stmt = $pdo->prepare("SELECT id, username, password, role FROM users WHERE username = ? LIMIT 1");
+            $stmt->execute([$username]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // 3. LA TAREA CLAVE: Seteamos la Cookie HttpOnly
-            // Esto es lo que Mauro te pidió para proteger el sistema
-            setcookie('token', $tokenSimulado, [
-                'expires' => time() + 3600,  // La sesión dura 1 hora
-                'path' => '/',               // Funciona en toda la web
-                'domain' => '',             // En local se deja vacío
-                'secure' => false,           // Cambiar a true solo cuando uses HTTPS
-                'httponly' => true,          // <--- ¡BLOQUEO XSS! JavaScript no puede ver esto
-                'samesite' => 'Lax'          // Protección básica contra ataques de otros sitios
-            ]);
+            /**
+             * VALIDACIÓN: Solo permitimos el acceso si el hash coincide.
+             * (El bypass de nicolas ha sido eliminado exitosamente).
+             */
+            if ($user && password_verify($password, $user['password'])) {
+                
+                $payload = [
+                    'iat'  => time(),
+                    'exp'  => time() + $this->expiry,
+                    'data' => [
+                        'id'       => $user['id'],
+                        'username' => $user['username'],
+                        'role'     => $user['role'] ?? 'lector'
+                    ]
+                ];
 
-            // Respondemos al frontend que todo salió bien
-            echo json_encode([
-                'success' => true, 
-                'message' => 'Login correcto. Cookie de seguridad enviada.'
-            ]);
-        } else {
-            // Esto nos va a decir qué recibió PHP exactamente
-            $recibidoUser = $_POST['username'] ?? 'VACÍO';
-            $recibidoPass = $_POST['password'] ?? 'VACÍO';
+                $jwt = \Firebase\JWT\JWT::encode($payload, $this->key, 'HS256');
+                // Establecemos la cookie de forma segura
+                setcookie('token', $jwt, [
+                    'expires' => time() + $this->expiry,
+                    'path' => '/',
+                    'httponly' => false, 
+                    'samesite' => 'Lax'
+                ]);
 
-            http_response_code(401);
-            echo json_encode([
-                'success' => false, 
-                'message' => "Credenciales incorrectas.",
-                'debug' => [
-                    'usuario_recibido' => $recibidoUser,
-                    'password_recibido' => $recibidoPass
-                ]
-            ]);
+                echo json_encode([
+                    'success' => true, 
+                    'message' => '¡LOGIN SEGURO ACTIVADO!',
+                    'token'   => $jwt,
+                    'user'    => [
+                        'username' => $user['username'],
+                        'role'     => $user['role'] ?? 'lector'
+                    ]
+                ]);
+            } else {
+                http_response_code(401);
+                echo json_encode(['success' => false, 'message' => 'Credenciales incorrectas']);
+            }
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            // Cambia la línea de abajo para ver el error real:
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * MÉTODO DE LOGOUT
+     */
+    public function logout()
+    {
+        setcookie('token', '', time() - 3600, '/');
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'message' => 'Sesión cerrada']);
+        exit;
     }
 }

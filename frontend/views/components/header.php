@@ -5,7 +5,7 @@
                 <a href="<?php echo (strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false)
                     ? '/wiki-kreative-gen15.5/frontend/'
                     : '/frontend/'; ?>">
-                    <img src="../assets/img/kreativenofondo.png" alt="Icono" class="icon">
+                    <img src="/wiki-kreative-gen15.5/assets/img/kreativenofondo.png" alt="Icono" class="icon">
                 </a>
                 <h1>Bienvenidas/os a la Wiki Kreative</h1>
                 

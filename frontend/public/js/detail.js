@@ -1,4 +1,3 @@
-//const API_BASE_URL = '/backend/public';
 //verifica si el proyecto esta en Local o Subido
 
 let BASE_PATH = window.location.origin;

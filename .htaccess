@@ -1,19 +1,26 @@
-RewriteOptions inherit
-Options -MultiViews
+# 1. BLOQUE DE SEGURIDAD (Lo que pidió Mauro)
+<FilesMatch "^\.env|config\.php|schema\.sql">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+Options -Indexes
+
+# 2. CONFIGURACIÓN DE RUTAS
 RewriteEngine On
+# Ajusta esto al nombre exacto de tu carpeta en htdocs
+RewriteBase /wiki-kreative-gen15.5/
 
-# Redirige la raíz a frontend
-RewriteCond %{REQUEST_URI} ^/$
-RewriteRule ^$ /frontend/ [R=302,L]
+# Si el usuario entra a la raíz, lo mandamos al frontend
+RewriteRule ^$ frontend/index.php [L,R=301]
 
-# Maneja las rutas de frontend
-RewriteCond %{REQUEST_URI} ^/frontend/(.*)$
+# Si piden algo del frontend que no existe como archivo real, lo manda a su index
+RewriteCond %{REQUEST_URI} ^/wiki-kreative-gen15.5/frontend/.*$
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^frontend/(.*)$ /frontend/index.php [QSA,L]
+RewriteRule ^frontend/(.*)$ frontend/index.php [QSA,L]
 
-# Maneja las rutas de backend
-RewriteCond %{REQUEST_URI} ^/backend/(.*)$
+# Si piden algo del backend que no existe, lo manda a su index público
+RewriteCond %{REQUEST_URI} ^/wiki-kreative-gen15.5/backend/.*$
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^backend/(.*)$ /backend/public/index.php [QSA,L]
+RewriteRule ^backend/(.*)$ backend/public/index.php [QSA,L]

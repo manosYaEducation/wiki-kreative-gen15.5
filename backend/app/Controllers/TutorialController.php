@@ -93,6 +93,7 @@ class TutorialController
 
     private function handleImageUpload($file)
     {
+        // 1. Ruta física absoluta para XAMPP
         $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/wiki-kreative-gen15.5/public/uploads/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
