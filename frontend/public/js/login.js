@@ -118,6 +118,8 @@ if (loginF) {
                 
                 console.log("✅ Login exitoso, redirigiendo...");
                 sessionStorage.setItem('userLoggedIn', 'true');
+                sessionStorage.setItem('userRole', result.user?.role || 'lector');
+                sessionStorage.setItem('userName', result.user?.username || '');
                 
                 setTimeout(() => {
                     window.location.href = '/wiki-kreative-gen15.5/frontend/index.php';

@@ -1,4 +1,4 @@
-<footer class="footer">
+<footer class="footer" id="footer">
     <div class="footer-container">
         <div class="footer-brand">
         <img src="/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png" alt="Logo" class="footer-logo">

@@ -838,36 +838,110 @@ function toggleTheme() {
 }
 
 
-// Check if user is logged in and update button accordingly
+// ========================
+// NAVBAR — Menú de usuario
+// ========================
+
+// Íconos por rol
+const ROLE_ICONS = {
+    'admin':  '👑',
+    'editor': '✏️',
+    'lector': '👤',
+};
+
+// Opciones del dropdown según rol
+function buildUserDropdown(role) {
+    const dropdown = document.getElementById('userDropdown');
+    if (!dropdown) return;
+    dropdown.innerHTML = '';
+
+    // Opciones exclusivas para admin y editor
+    if (role === 'admin' || role === 'editor') {
+        const adminItems = [
+            { icon: 'fa-solid fa-table-columns', label: 'Dashboard',        url: 'enlace.php?destino=dashboard' },
+            { icon: 'fa-brands fa-trello',       label: 'Workspace Trello', url: 'enlace.php?destino=trello' },
+            { icon: 'fa-brands fa-wordpress',    label: 'WordPress',        url: 'enlace.php?destino=wordpress' },
+        ];
+        adminItems.forEach(item => {
+            dropdown.innerHTML += `
+                <a href="${item.url}" target="_blank" class="user-dropdown-item">
+                    <i class="${item.icon}"></i> ${item.label}
+                </a>`;
+        });
+        // Divisor
+        dropdown.innerHTML += `<div class="user-dropdown-divider"></div>`;
+    }
+
+
+    // Divisor + Cerrar sesión
+    dropdown.innerHTML += `
+        <div class="user-dropdown-divider"></div>
+        <div class="user-dropdown-item logout-item" onclick="handleLogout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+        </div>`;
+}
+
+// Check si el usuario está logueado y actualiza la navbar
 function checkSessionStatus() {
-    // Verificar si existe una sesión activa en sessionStorage o localStorage
-    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' || 
-                      localStorage.getItem('userLoggedIn') === 'true' ||
-                      sessionStorage.getItem('userId') || 
-                      localStorage.getItem('userId');
-    
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' ||
+                       localStorage.getItem('userLoggedIn') === 'true' ||
+                       sessionStorage.getItem('userId') ||
+                       localStorage.getItem('userId');
+
+    const role    = sessionStorage.getItem('userRole') || localStorage.getItem('userRole') || 'lector';
+    const name    = sessionStorage.getItem('userName') || localStorage.getItem('userName') || 'Usuario';
+
+    const loginBtn    = document.getElementById('loginBtn');
+    const userTrigger = document.getElementById('userTrigger');
+    const roleIcon    = document.getElementById('userRoleIcon');
+    const nameDisplay = document.getElementById('userNameDisplay');
+
+    if (isLoggedIn) {
+        if (loginBtn)    loginBtn.style.display    = 'none';
+        if (userTrigger) userTrigger.style.display = 'flex';
+        if (roleIcon)    roleIcon.textContent       = ROLE_ICONS[role] || '👤';
+        if (nameDisplay) nameDisplay.textContent    = name;
+        buildUserDropdown(role);
+    } else {
+        if (loginBtn)    loginBtn.style.display    = 'flex';
+        if (userTrigger) userTrigger.style.display = 'none';
+    }
+
     updateUploadButton(isLoggedIn);
 }
 
-// Update upload button text and functionality
+// Abrir/cerrar el dropdown del usuario
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    const trigger  = document.getElementById('userTrigger');
+    if (!dropdown) return;
+    dropdown.classList.toggle('show');
+    trigger?.classList.toggle('open');
+}
+
+// Cerrar dropdown al hacer click fuera
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.user-menu')) {
+        document.getElementById('userDropdown')?.classList.remove('show');
+        document.getElementById('userTrigger')?.classList.remove('open');
+    }
+});
+
+// Hamburger móvil
+function toggleMobileMenu() {
+    document.getElementById('mobileMenu')?.classList.toggle('open');
+    document.getElementById('hamburger')?.classList.toggle('open');
+}
+
+// Update upload button — solo visible si hay sesión
 function updateUploadButton(isLoggedIn) {
-    const uploadButtonIcon = document.getElementById('uploadButtonIcon');
-    const uploadButtonText = document.getElementById('uploadButtonText');
-    const logoutButton = document.getElementById('logoutButton');
-    
+    const uploadButton = document.getElementById('uploadButton');
+    if (!uploadButton) return;
+
     if (isLoggedIn) {
-        if (uploadButtonIcon) uploadButtonIcon.textContent = '📝';
-        if (uploadButtonText) uploadButtonText.textContent = 'Subir Publicación';
-        if (logoutButton) {
-            // Usamos !important para que ningún estilo de CSS lo oculte por error
-            logoutButton.style.setProperty('display', 'flex', 'important');
-        }
+        uploadButton.style.removeProperty('display');
     } else {
-        if (uploadButtonIcon) uploadButtonIcon.textContent = '🔐';
-        if (uploadButtonText) uploadButtonText.textContent = 'Iniciar Sesión';
-        if (logoutButton) {
-            logoutButton.style.display = 'none';
-        }
+        uploadButton.style.display = 'none';
     }
 }
 
@@ -878,15 +952,11 @@ function handleUploadButtonClick() {
                         localStorage.getItem('userId');
     
     if (isLoggedIn) {
-        // Usuario está logueado, abrir modal de subida
         openUploadModal();
     } else {
-        // Usuario no está logueado, redirigir a login
         window.location.href = 'views/login.html';
     }
 }
-
-
 
 // Monitor session changes (useful when user logs in from another tab/window)
 window.addEventListener('storage', function(e) {
@@ -894,20 +964,15 @@ window.addEventListener('storage', function(e) {
         checkSessionStatus();
     }
 });
+
 // Función para cerrar la sesión automáticamente
 function handleLogout() {
-    // 1. Borramos la cookie de inmediato
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    
-    // 2. Limpiamos los datos de sesión para que la interfaz cambie
     sessionStorage.clear();
     localStorage.removeItem('userLoggedIn');
     localStorage.removeItem('userId');
-
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userName');
     console.log("Cerrando sesión...");
-
-    // 3. REDIRECCIÓN INMEDIATA
-    // Esto es lo más importante: detiene cualquier otra ejecución de JS 
-    // y recarga el sitio limpio, evitando que salte el cartel de error 401.
     window.location.href = '/wiki-kreative-gen15.5/frontend/index.php';
 }

@@ -26,24 +26,7 @@
 <body>
     <?php require_once("components/header.php"); ?>
 
-    <section class="ambientes-section" id="enlaces">
-        <div class="enlaces">
-            <ul class="link-buttons">
-                <li><a class="button-social" href="enlace.php?destino=discord" target="_blank"><i class="fab fa-discord"></i> Discord</a></li>
-                <li><a class="button-social" href="enlace.php?destino=dashboard" target="_blank"><i class="fa-solid fa-table"></i> Dashboard</a></li>
-                <li><a class="button-social" href="enlace.php?destino=trello" target="_blank"><i class="fa-brands fa-trello"></i> Workspace Trello</a></li>
-                <li><a class="button-social" href="enlace.php?destino=whatsapp" target="_blank"><i class="fa-brands fa-whatsapp"></i> Whatsapp</a></li>
-                <li><a class="button-social" href="enlace.php?destino=wordpress" target="_blank"><i class="fa-brands fa-wordpress"></i> Wordpress</a></li>
-                <li><a class="button-social" href="enlace.php?destino=tienda" target="_blank"><i class="fa-solid fa-shop"></i> Tienda</a></li>
-            </ul>
-        </div>
-    </section>
 
-    <section class="search-section">
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Buscar publicaciones..." id="searchInput">
-        </div>
-    </section>
 
     <main class="main-content">
         <aside class="sidebar">
@@ -70,13 +53,9 @@
                 <h1>Wiki KREATIVE</h1>
 
                 <div class="header-buttons">
-                    <button class="upload-button" id="uploadButton" onclick="handleUploadButtonClick()">
+                    <button class="upload-button" id="uploadButton" onclick="handleUploadButtonClick()" style="display:none;">
                         <span id="uploadButtonIcon">📝</span>
                         <span id="uploadButtonText">Subir Publicación</span>
-                    </button>
-                    <button class="logout-button" id="logoutButton" onclick="handleLogout()" style="display: none;">
-                        <span>🚪</span>
-                        <span>Cerrar Sesión</span>
                     </button>
                 </div>
             </div>
