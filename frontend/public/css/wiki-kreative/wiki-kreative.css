@@ -471,6 +471,13 @@ body.dark-mode .tag-item:hover {
     border-color: #4CAF50;
 }
 
+body.dark-mode .tag-item.active {
+    background-color: #22c55e;
+    color: #fff;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.35);
+}
+
 /* Content Area */
 .content-area {
     flex: 1;
@@ -1022,6 +1029,8 @@ body.dark-mode .form-select:focus {
     cursor: pointer;
     transition: all 0.2s;
     background-color: #f9fafb;
+    position: relative;
+    overflow: hidden;
 }
 
 body.dark-mode .image-upload-area {
@@ -1045,6 +1054,40 @@ body.dark-mode .image-upload-area:hover {
 
 body.dark-mode .image-upload-area.dragover {
     background-color: #2A2A2A;
+}
+
+/* Estado con imagen cargada */
+.image-upload-area.has-image {
+    border: 2px solid #4CAF50;
+    padding: 0;
+    background-color: transparent;
+    height: 220px;
+}
+
+.image-upload-area.has-image:hover {
+    background-color: transparent;
+}
+
+/* Overlay "Clic para cambiar imagen" */
+.image-upload-area.has-image::after {
+    content: '🖼️ Clic para cambiar imagen';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.image-upload-area.has-image:hover::after {
+    opacity: 1;
 }
 
 .upload-icon {
@@ -1078,12 +1121,16 @@ body.dark-mode .upload-subtext {
     color: #9ca3af;
 }
 
+/* La imagen de preview ocupa todo el marco */
 .image-preview {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 8px;
-    margin-top: 12px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    margin: 0;
 }
+
 
 .tags-input-container {
     display: flex;

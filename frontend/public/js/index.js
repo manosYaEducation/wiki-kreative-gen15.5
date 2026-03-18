@@ -9,6 +9,26 @@ if (window.location.pathname.startsWith('/wiki-kreative')) {
 
 const API_BASE_URL = BASE_PATH;
 
+// --- ROL DEL USUARIO (leído del JWT en cookie) ---
+let currentUserRole = null;
+
+/**
+ * Decodifica el payload del token JWT de la cookie 'token'
+ * y devuelve el rol del usuario, o null si no hay sesión.
+ */
+function getUserRoleFromCookie() {
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('token='));
+    if (!cookie) return null;
+    try {
+        const token = cookie.trim().split('=').slice(1).join('=');
+        const base64Payload = token.split('.')[1];
+        const payload = JSON.parse(atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/')));
+        return payload?.data?.role ?? null;
+    } catch (e) {
+        return null;
+    }
+}
+// --------------------------------------------------
 
 let currentPage = 1;
 let currentFilter = 'todas';
@@ -110,10 +130,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
     });
 
+    // Leer el rol del usuario desde el JWT
+    currentUserRole = getUserRoleFromCookie();
+
     checkSessionStatus();
 
     await fetchPublications();
     setupEventListeners();
+
+    // Ocultar botón de nueva publicación si el usuario es lector o no está logueado
+    const canEdit = currentUserRole === 'admin' || currentUserRole === 'editor';
+    const uploadBtn = document.getElementById('uploadButton');
+    if (uploadBtn && !canEdit) {
+        uploadBtn.style.display = 'none';
+    }
 });
 
 // Setup event listeners
@@ -122,10 +152,21 @@ function setupEventListeners() {
         performSearch();
     });
 
-    window.addEventListener('click', function(e) {
-        if (e.target.classList.contains('modal')) {
-            closeUploadModal();
-            closeEditModal();
+    window.addEventListener('click', async function(e) {
+        if (!e.target.classList.contains('modal')) return;
+
+        const uploadModal = document.getElementById('uploadModal');
+        const editModal   = document.getElementById('editModal');
+
+        if (uploadModal && uploadModal.classList.contains('show') && e.target === uploadModal) {
+            const confirmed = await showConfirm('¿Deseas cancelar la publicación? Se perderá todo lo que hayas escrito o subido.');
+            if (confirmed) closeUploadModal();
+            return;
+        }
+
+        if (editModal && editModal.classList.contains('show') && e.target === editModal) {
+            const confirmed = await showConfirm('¿Deseas cancelar la edición? Se perderán los cambios realizados.');
+            if (confirmed) closeEditModal();
         }
     });
 
@@ -183,13 +224,10 @@ function createPublicationCard(pub) {
     : `/wiki-kreative-gen15.5/assets/img/kreativenofondo.png`;
 
     
-    // Comprobar si el usuario está logueado para mostrar opciones de edición
-    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' || 
-                      localStorage.getItem('userLoggedIn') === 'true' ||
-                      sessionStorage.getItem('userId') || 
-                      localStorage.getItem('userId');
+    // Solo admin y editor pueden editar/eliminar publicaciones
+    const canEdit = currentUserRole === 'admin' || currentUserRole === 'editor';
     
-    const dropdownMenu = isLoggedIn ? `
+    const dropdownMenu = canEdit ? `
         <div class="card-dropdown">
             <button class="dropdown-button" onclick="toggleDropdown(event, ${pub.id})">⋮</button>
             <div class="dropdown-menu" id="dropdown-${pub.id}">
@@ -409,15 +447,20 @@ function openEditModal(publicationId) {
     if (publication.image) {
         deleteImageButton.style.display = 'block';
 
-        // --- TRUCO ROMPE-CACHÉ AQUÍ ---
         if (editImagePreview) {
-            // Extraemos el nombre real del archivo
             const imageName = publication.image.split('/').pop();
             const projectRoot = window.location.pathname.startsWith('/wiki-kreative') ? '/wiki-kreative-gen15.5' : '';
-            
-            // Le sumamos el tiempo actual para que el navegador descargue la versión nueva
             editImagePreview.src = `${projectRoot}/public/uploads/${imageName}?t=${Date.now()}`;
             editImagePreview.style.display = 'block';
+
+            // Activar modo "con imagen" en el área de edición
+            const editUploadArea = editImagePreview.closest('.image-upload-area');
+            if (editUploadArea) {
+                editUploadArea.classList.add('has-image');
+                editUploadArea.querySelector('.upload-icon')  && (editUploadArea.querySelector('.upload-icon').style.display  = 'none');
+                editUploadArea.querySelector('.upload-text')  && (editUploadArea.querySelector('.upload-text').style.display  = 'none');
+                editUploadArea.querySelector('.upload-subtext') && (editUploadArea.querySelector('.upload-subtext').style.display = 'none');
+            }
         }
     } else {
         deleteImageButton.style.display = 'none';
@@ -637,8 +680,11 @@ function addTagToDisplay(tagText, modalType) {
 
 // Image upload functionality
 function setupImageUpload(modalType) {
-    const imageInput = document.getElementById(`${modalType}Image`);
+    const imageInput   = document.getElementById(`${modalType}Image`);
     const imagePreview = document.getElementById(`${modalType}ImagePreview`);
+    // El área contenedora (el div clickeable)
+    const uploadArea   = imageInput?.closest('.image-upload-area');
+
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -646,11 +692,35 @@ function setupImageUpload(modalType) {
             reader.onload = function(e) {
                 imagePreview.src = e.target.result;
                 imagePreview.style.display = 'block';
+
+                // Modo "con imagen": ocultamos placeholder y activamos el marco lleno
+                if (uploadArea) {
+                    uploadArea.classList.add('has-image');
+                    uploadArea.querySelector('.upload-icon')?.style && (uploadArea.querySelector('.upload-icon').style.display = 'none');
+                    uploadArea.querySelector('.upload-text')?.style && (uploadArea.querySelector('.upload-text').style.display = 'none');
+                    uploadArea.querySelector('.upload-subtext')?.style && (uploadArea.querySelector('.upload-subtext').style.display = 'none');
+                }
             };
             reader.readAsDataURL(file);
         }
     });
 }
+
+/** Restaura el área de upload a su estado vacío (sin imagen) */
+function resetImageUploadArea(modalType) {
+    const imageInput   = document.getElementById(`${modalType}Image`);
+    const imagePreview = document.getElementById(`${modalType}ImagePreview`);
+    const uploadArea   = imageInput?.closest('.image-upload-area');
+
+    if (imagePreview) { imagePreview.src = ''; imagePreview.style.display = 'none'; }
+    if (uploadArea) {
+        uploadArea.classList.remove('has-image');
+        uploadArea.querySelector('.upload-icon')  && (uploadArea.querySelector('.upload-icon').style.display  = '');
+        uploadArea.querySelector('.upload-text')  && (uploadArea.querySelector('.upload-text').style.display  = '');
+        uploadArea.querySelector('.upload-subtext') && (uploadArea.querySelector('.upload-subtext').style.display = '');
+    }
+}
+
 
 //Display de archivos existentes en el modal de edición
 function displayExistingFiles(filesData) {
@@ -750,13 +820,13 @@ function deleteCurrentImage() {
 function resetUploadForm() {
     document.getElementById('uploadForm').reset();
     document.getElementById('uploadTagsDisplay').innerHTML = '';
-    document.getElementById('uploadImagePreview').style.display = 'none';
+    resetImageUploadArea('upload');
 }
 
 function resetEditForm() {
     document.getElementById('editForm').reset();
     document.getElementById('editTagsDisplay').innerHTML = '';
-    document.getElementById('editImagePreview').style.display = 'none';
+    resetImageUploadArea('edit');
     document.getElementById('editExistingFiles').innerHTML = '';
     deleteImageOnUpdate = false;
     filesToDeleteOnUpdate = [];

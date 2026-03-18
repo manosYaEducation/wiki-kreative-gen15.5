@@ -37,8 +37,22 @@ class Router
                     $middleware = new AuthMiddleware();
                     // El guardia revisa el token. Si falla, él mismo corta la ejecución.
                     $userData = $middleware->checkToken();
-                    
-                    // Opcional: Podrías guardar $userData para usarlo después
+
+                    // --- VERIFICACIÓN DE ROL ---
+                    // Si la ruta define roles permitidos, el usuario debe tener uno de ellos.
+                    if (isset($handler['roles']) && is_array($handler['roles'])) {
+                        $userRole = $userData->role ?? '';
+                        if (!in_array($userRole, $handler['roles'])) {
+                            http_response_code(403);
+                            header('Content-Type: application/json');
+                            echo json_encode([
+                                'success' => false,
+                                'message' => 'No tienes permisos para realizar esta acción.'
+                            ]);
+                            exit;
+                        }
+                    }
+                    // ---------------------------
                 }
                 // -----------------------------------------------
 
