@@ -20,7 +20,7 @@
 
             <div class="nav-search">
                 <i class="fa-solid fa-magnifying-glass nav-search-icon"></i>
-                <input type="text" class="nav-search-input" placeholder="Buscar publicaciones..." id="searchInput">
+                <input type="text" class="nav-search-input" placeholder="Buscar..." id="searchInput">
             </div>
         </div>
 
