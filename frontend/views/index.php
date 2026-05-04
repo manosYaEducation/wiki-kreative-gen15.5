@@ -26,6 +26,7 @@
 <body>
     <?php require_once("components/header.php"); ?>
 
+<<<<<<< HEAD
     <section class="ambientes-section" id="enlaces">
         <div class="enlaces">
             <ul class="link-buttons">
@@ -36,12 +37,9 @@
             </ul>
         </div>
     </section>
+=======
+>>>>>>> origin/Feature/2026-03-17/JRivera/Rediseño_NVAR01
 
-    <section class="search-section">
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Buscar publicaciones..." id="searchInput">
-        </div>
-    </section>
 
     <main class="main-content">
         <aside class="sidebar">
@@ -68,13 +66,9 @@
                 <h1>Wiki KREATIVE</h1>
 
                 <div class="header-buttons">
-                    <button class="upload-button" id="uploadButton" onclick="handleUploadButtonClick()">
+                    <button class="upload-button" id="uploadButton" onclick="handleUploadButtonClick()" style="display:none;">
                         <span id="uploadButtonIcon">📝</span>
                         <span id="uploadButtonText">Subir Publicación</span>
-                    </button>
-                    <button class="logout-button" id="logoutButton" onclick="handleLogout()" style="display: none;">
-                        <span>🚪</span>
-                        <span>Cerrar Sesión</span>
                     </button>
                 </div>
             </div>
