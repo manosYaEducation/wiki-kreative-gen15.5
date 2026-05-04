@@ -23,19 +23,22 @@ return [
         'controller' => TutorialController::class, 
         'method' => 'createTutorial', 
         'httpMethod' => 'POST',
-        'auth' => true  // 🔒 Requiere Login
+        'auth' => true,
+        'roles' => ['admin', 'editor']  // 🔒 Solo admin y editor
     ],
     'tutorial/update' => [
         'controller' => TutorialController::class, 
         'method' => 'UpdateTutorial', 
         'httpMethod' => 'POST',
-        'auth' => true  // 🔒 Requiere Login
+        'auth' => true,
+        'roles' => ['admin', 'editor']  // 🔒 Solo admin y editor
     ],
     'tutorial/delete' => [
         'controller' => TutorialController::class, 
         'method' => 'deleteTutorial', 
         'httpMethod' => 'POST',
-        'auth' => true  // 🔒 Requiere Login
+        'auth' => true,
+        'roles' => ['admin', 'editor']  // 🔒 Solo admin y editor
     ],
 
     // --- AUTENTICACIÓN ---
