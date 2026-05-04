@@ -26,21 +26,6 @@
 <body>
     <?php require_once("components/header.php"); ?>
 
-<<<<<<< HEAD
-    <section class="ambientes-section" id="enlaces">
-        <div class="enlaces">
-            <ul class="link-buttons">
-                <li><a class="button-social" href="enlace.php?destino=dashboard" target="_blank"><i class="fa-solid fa-table"></i> Dashboard</a></li>
-                <li><a class="button-social" href="enlace.php?destino=trello" target="_blank"><i class="fa-brands fa-trello"></i> Workspace Trello</a></li>
-                <li><a class="button-social" href="enlace.php?destino=wordpress" target="_blank"><i class="fa-brands fa-wordpress"></i> Wordpress</a></li>
-                <li><a class="button-social" href="enlace.php?destino=tienda" target="_blank"><i class="fa-solid fa-shop"></i> Tienda</a></li>
-            </ul>
-        </div>
-    </section>
-=======
->>>>>>> origin/Feature/2026-03-17/JRivera/Rediseño_NVAR01
-
-
     <main class="main-content">
         <aside class="sidebar">
             <div class="filter-section">

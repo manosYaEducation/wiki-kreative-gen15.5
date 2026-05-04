@@ -6,8 +6,6 @@ namespace App\Backend\Controllers;
  * 1. CARGA DE CONFIGURACIÓN "POR DETRÁS"
  * Cargamos el archivo que lee el .env de la raíz.
  */
- // Cargamos las librerías de Composer (Firebase JWT)
-require_once __DIR__ . '/../../vendor/autoload.php'; 
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;

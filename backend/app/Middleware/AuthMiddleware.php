@@ -5,7 +5,6 @@ namespace App\Backend\Middleware;
 // 1. CARGA DE CONFIGURACIÓN Y LIBRERÍAS
 // Esto busca el archivo subiendo los niveles correctos
 require_once dirname(__DIR__, 2) . '/config/env_loader.php'; 
-require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
