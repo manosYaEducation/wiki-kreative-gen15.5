@@ -1,17 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 
+<?php
+// Detectar automáticamente si estamos en XAMPP local o en producción
+$isLocal = strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false;
+$basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
+?>
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Equipo Profesional Gen10 Alpha Docere</title>
 
-    <link rel="icon" href="/assets/img/letra-k.png" type="image/png">
-    <link rel="stylesheet" href="/frontend/public/css/admin/index-admin.css">
-    <link rel="stylesheet" href="/frontend/public/css/admin/index-admin.css">
-    <link rel="stylesheet" href="/frontend/public/css/wiki-kreative/wiki-kreative.css">
-    <link rel="stylesheet" href="/frontend/public/css/wiki-kreative/wiki-kreative-feedback.css">
-    <link rel="stylesheet" href="/frontend/public/css/footer/footer.css">
+    <link rel="icon" href="<?= $basePath ?>/assets/img/letra-k.png" type="image/png">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/admin/index-admin.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/admin/index-admin.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/wiki-kreative/wiki-kreative.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/wiki-kreative/wiki-kreative-feedback.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/footer/footer.css">
     
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -221,8 +227,8 @@
             </div>
         </div>
     </div>
-    <script src="/frontend/public/js/index.js"></script>
-    <script src="/frontend/public/js/wiki-kreative-feedback.js"></script>
+    <script src="<?= $basePath ?>/frontend/public/js/index.js"></script>
+    <script src="<?= $basePath ?>/frontend/public/js/wiki-kreative-feedback.js"></script>
     <?php require_once("components/footer-index.php"); ?>
     
 </body>

@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+<?php
+$isLocal = strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false;
+$basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
+?>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Equipo Profesional Gen10 Alpha Docere</title>
-    <link rel="icon" href="/assets/img/letra-k.png" type="image/x-icon">
+    <link rel="icon" href="<?= $basePath ?>/assets/img/letra-k.png" type="image/x-icon">
     <!--<link href="../frontend/css/admin/index-admin.css" rel="stylesheet" />-->
-    <link rel="stylesheet" href="public/css/admin/index-admin.css">
-	<link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/admin/index-admin.css">
+	<link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/wiki-kreative/wiki-kreative.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" href="./assets/img/letra-k (1).png" type="image/x-icon">
@@ -92,6 +96,6 @@
         </div>
     </main>
 
-	<script src="public/js/detail.js"></script>
+	<script src="<?= $basePath ?>/frontend/public/js/detail.js"></script>
 </body>
 </html>
