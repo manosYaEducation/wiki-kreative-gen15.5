@@ -37,7 +37,8 @@ use App\Backend\Router;
 if (str_contains($_SERVER['HTTP_HOST'], 'localhost') || str_contains($_SERVER['HTTP_HOST'], '127.0.0.1')) {
     $basePath = '/wiki-kreative-gen15.5/backend/public';
 } else {
-    $basePath = '/backend'; // Ajuste para el servidor de producción
+    // En producción, el .htaccess dirige /backend/ a esta carpeta
+    $basePath = '/backend';
 }
 
 // 4. DESPACHO DE RUTAS

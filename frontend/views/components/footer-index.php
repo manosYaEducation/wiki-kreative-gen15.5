@@ -2,7 +2,7 @@
     <div class="footer-container">
 
         <div class="footer-brand">
-            <img src="/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png" alt="Logo" class="footer-logo">
+            <img src="<?php echo (strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false) ? '/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png' : '/assets/img/kreative_white_logo.png'; ?>" alt="Logo" class="footer-logo">
         </div>
 
         <div class="footer-section">

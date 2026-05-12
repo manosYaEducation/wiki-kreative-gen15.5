@@ -1,84 +1,106 @@
-# Guía de Levantamiento - Wiki Kreative Gen 15.5
+# 🚀 Guía de Levantamiento Local — Wiki Kreative Gen 15.5
 
-Esta guía detalla los pasos necesarios para configurar y ejecutar el proyecto **Wiki Kreative** en un entorno local utilizando XAMPP.
-
-## 1. Requisitos Previos
-
-Antes de comenzar, asegúrate de tener instalado:
-- **XAMPP** (con PHP 8.0 o superior).
-- **Composer** (gestor de dependencias de PHP).
-- **Git** (opcional, para clonar el repositorio).
+Guía rápida para levantar la Wiki en tu computador con XAMPP.
 
 ---
 
-## 2. Pasos de Instalación
+## 📋 Requisitos
 
-### 2.1. Clonar o Descargar el Proyecto
-Ubica el proyecto dentro de la carpeta `htdocs` de tu instalación de XAMPP:
-`C:\xampp\htdocs\wiki-kreative-gen15.5`
-
-### 2.2. Instalación de Dependencias (Composer)
-El proyecto cuenta con dos archivos `composer.json` que deben ser procesados:
-
-1.  **Dependencias de la Raíz / Frontend:**
-    Abre una terminal en la raíz del proyecto y ejecuta:
-    ```bash
-    composer install
-    ```
-    *Esto generará la carpeta `vendor` en la raíz, necesaria para el autoloading y las variables de entorno.*
-
-2.  **Dependencias del Backend:**
-    Navega a la carpeta `backend` y ejecuta nuevamente:
-    ```bash
-    cd backend
-    composer install
-    ```
+- **XAMPP** (PHP 8.0+) → [descargar](https://www.apachefriends.org/)
+- **Composer** → [descargar](https://getcomposer.org/)
+- **Git** → [descargar](https://git-scm.com/)
 
 ---
 
-## 3. Configuración de Base de Datos
+## 1. Clonar el Proyecto
 
-1.  Inicia **Apache** y **MySQL** desde el Panel de Control de XAMPP.
-2.  Accede a `http://localhost/phpmyadmin`.
-3.  Crea una nueva base de datos llamada `alphadocere_wiki`.
-4.  Importa el archivo SQL que se encuentra en la raíz del proyecto:
-    `alphadocere_wiki.sql`
-
----
-
-## 4. Variables de Entorno (.env)
-
-El proyecto utiliza un archivo `.env` para la configuración de la base de datos y seguridad JWT.
-
-1.  Asegúrate de que exista el archivo `.env` en la raíz.
-2.  Si no existe, copia el contenido de `.env.example` a un nuevo archivo `.env`.
-3.  Verifica que las credenciales coincidan con tu configuración de XAMPP:
-    ```env
-    DEV_DB_HOST=localhost
-    DEV_DB_NAME=alphadocere_wiki
-    DEV_DB_USER=root
-    DEV_DB_PASS=
-    ```
+```bash
+cd C:\xampp\htdocs
+git clone <URL_DEL_REPOSITORIO> wiki-kreative-gen15.5
+```
 
 ---
 
-## 5. Acceso a la Aplicación
+## 2. Instalar Dependencias
 
-Una vez configurado todo, puedes acceder a las diferentes partes del sistema:
+Abre una terminal y ejecuta estos dos comandos:
 
-- **Frontend:** `http://localhost/wiki-kreative-gen15.5/frontend/index.php`
-- **Backend/API:** `http://localhost/wiki-kreative-gen15.5/backend/`
+```bash
+cd C:\xampp\htdocs\wiki-kreative-gen15.5
+composer install
+```
+
+```bash
+cd backend
+composer install
+```
 
 ---
 
-## 6. Solución de Problemas Comunes
+## 3. Crear la Base de Datos
 
-### Error: "Failed to open stream: No such file or directory in .../vendor/autoload.php"
-Este error ocurre cuando las dependencias de Composer no se han instalado correctamente.
-**Solución:** Ejecuta `composer install` en la raíz del proyecto.
+1. Abre XAMPP e inicia **Apache** y **MySQL**.
+2. Ve a `http://localhost/phpmyadmin`.
+3. Haz clic en **Importar** y selecciona el archivo `database/schema.sql` del proyecto.
+4. Dale a **Continuar**.
 
-### Error de Conexión a la Base de Datos
-Asegúrate de que el servicio MySQL esté corriendo y que el nombre de la base de datos en el archivo `.env` sea exactamente `alphadocere_wiki`.
+---
 
-### Error 404 en Rutas
-El proyecto utiliza archivos `.htaccess` para el manejo de rutas. Asegúrate de que el módulo `mod_rewrite` de Apache esté habilitado en tu configuración de XAMPP.
+## 4. Configurar el .env
+
+1. Copia el archivo `.env.example` y renómbralo a `.env`.
+2. Ábrelo y configúralo así:
+
+```env
+ENVIRONMENT=dev
+
+# Wiki (local, tu XAMPP)
+DEV_DB_HOST=localhost
+DEV_DB_NAME=alphadocere_wiki
+DEV_DB_USER=root
+DEV_DB_PASS=
+DEV_DB_PORT=3306
+
+# Auth (remoto, pedir credenciales al líder)
+DEV_AUTH_DB_HOST=___PEDIR_AL_LIDER___
+DEV_AUTH_DB_NAME=___PEDIR_AL_LIDER___
+DEV_AUTH_DB_USER=___PEDIR_AL_LIDER___
+DEV_AUTH_DB_PASS=___PEDIR_AL_LIDER___
+DEV_AUTH_DB_PORT=3306
+
+WIKI_PROYECTO_ID=3
+JWT_SECRET=WikiSecretKey_Gen15_Version2_2026_Secure
+JWT_EXPIRY=3600
+```
+
+> ⚠️ **Las credenciales de Auth son privadas.** Pídelas al líder del proyecto directamente.
+
+---
+
+## 5. Probar
+
+Abre tu navegador y entra a:
+
+```
+http://localhost/wiki-kreative-gen15.5/frontend/index.php
+```
+
+✅ Si ves la Wiki con publicaciones, ¡está funcionando!
+
+Para probar el login, usa las mismas credenciales del sistema de autenticación del proyecto.
+
+---
+
+## 🔧 Problemas Comunes
+
+| Error | Solución |
+|---|---|
+| `vendor/autoload.php not found` | Ejecuta `composer install` en la raíz y en `backend/` |
+| `Access denied for user 'root'` | Revisa las credenciales en tu `.env` |
+| `Connection refused` al hacer login | Pide al líder que habilite el acceso remoto a MySQL para tu IP |
+| Las imágenes no cargan | Crea la carpeta `public/uploads/` en la raíz del proyecto |
+| El rol no aparece bien después de login | Cierra sesión, presiona `CTRL+SHIFT+R` y vuelve a entrar |
+
+---
+
+> **Última actualización:** Mayo 2026

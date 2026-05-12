@@ -1,13 +1,8 @@
-//const API_BASE_URL = '/backend';
-//verifica si el proyecto esta en Local o Subido
-let BASE_PATH = window.location.origin;
-if (window.location.pathname.startsWith('/wiki-kreative')) {
-    BASE_PATH='/wiki-kreative-gen15.5/backend/public';
-} else {
-    BASE_PATH='/backend/public';
-}
-
-const API_BASE_URL = BASE_PATH;
+// Detectamos la raíz del proyecto de forma dinámica
+// Si estamos en un subdominio que apunta a la raíz, window.location.pathname.split('/frontend')[0] será vacío
+const PROJECT_ROOT = window.location.pathname.split('/frontend')[0];
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE_URL = isLocalhost ? window.location.origin + PROJECT_ROOT + '/backend/public' : '/backend';
 
 // --- ROL DEL USUARIO (leído del JWT en cookie) ---
 let currentUserRole = null;
@@ -123,8 +118,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.body.classList.toggle('dark-mode', currentTheme === 'dark');
     const logo = document.querySelector('.icon');
     if (logo) {
-        logo.src = currentTheme === 'dark' ? '/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png' 
-        : '/wiki-kreative-gen15.5/assets/img/kreativenofondo.png';;
+        logo.src = currentTheme === 'dark' ? PROJECT_ROOT + '/assets/img/kreative_white_logo.png' 
+        : PROJECT_ROOT + '/assets/img/kreativenofondo.png';;
     }
     document.querySelectorAll('.theme-toggle').forEach(btn => {
         btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
@@ -139,7 +134,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupEventListeners();
 
     // Ocultar botón de nueva publicación si el usuario es lector o no está logueado
-    const canEdit = currentUserRole === 'admin' || currentUserRole === 'editor';
+    const role = (currentUserRole || "").toLowerCase();
+    const canEdit = role.includes('admin') || role.includes('editor');
+    
     const uploadBtn = document.getElementById('uploadButton');
     if (uploadBtn && !canEdit) {
         uploadBtn.style.display = 'none';
@@ -208,9 +205,8 @@ function createPublicationCard(pub) {
     // Ensure tags is an array
     const tags = Array.isArray(pub.tags) ? pub.tags : [];
 
-    // 1. Detectamos la raíz del proyecto
-    const isLocal = window.location.pathname.startsWith('/wiki-kreative');
-    const projectRoot = isLocal ? '/wiki-kreative-gen15.5' : '';
+    // 1. Detectamos la raíz del proyecto (ya definida como PROJECT_ROOT)
+    const projectRoot = PROJECT_ROOT;
 
     // 2. Extraemos el nombre limpio de la imagen
     const imageName = pub.image ? pub.image.split('/').pop() : '';
@@ -220,12 +216,13 @@ function createPublicationCard(pub) {
     // En local: /wiki-kreative-gen15.5/public/uploads/nombre.jpg
     // En producción: /public/uploads/nombre.jpg
     const imageUrl = (imageName && imageName.trim() !== '') 
-    ? `${pub.image}${cacheBuster}` 
-    : `/wiki-kreative-gen15.5/assets/img/kreativenofondo.png`;
+    ? PROJECT_ROOT + `/public/uploads/${imageName}${cacheBuster}` 
+    : PROJECT_ROOT + `/assets/img/kreativenofondo.png`;
 
     
     // Solo admin y editor pueden editar/eliminar publicaciones
-    const canEdit = currentUserRole === 'admin' || currentUserRole === 'editor';
+    const role = (currentUserRole || "").toLowerCase();
+    const canEdit = role.includes('admin') || role.includes('editor');
     
     const dropdownMenu = canEdit ? `
         <div class="card-dropdown">
@@ -449,7 +446,7 @@ function openEditModal(publicationId) {
 
         if (editImagePreview) {
             const imageName = publication.image.split('/').pop();
-            const projectRoot = window.location.pathname.startsWith('/wiki-kreative') ? '/wiki-kreative-gen15.5' : '';
+            const projectRoot = PROJECT_ROOT;
             editImagePreview.src = `${projectRoot}/public/uploads/${imageName}?t=${Date.now()}`;
             editImagePreview.style.display = 'block';
 
@@ -898,8 +895,8 @@ function toggleTheme() {
     const isDarkMode = document.body.classList.toggle('dark-mode');
     const logo = document.querySelector('.icon');
     if (logo) {
-        logo.src = isDarkMode ? '/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png' 
-        : '/wiki-kreative-gen15.5/assets/img/kreativenofondo.png';
+        logo.src = isDarkMode ? PROJECT_ROOT + '/assets/img/kreative_white_logo.png' 
+        : PROJECT_ROOT + '/assets/img/kreativenofondo.png';
     }
     document.querySelectorAll('.theme-toggle').forEach(btn => {
         btn.textContent = isDarkMode ? '☀️' : '🌙';
@@ -914,9 +911,12 @@ function toggleTheme() {
 
 // Íconos por rol
 const ROLE_ICONS = {
-    'admin':  '👑',
-    'editor': '✏️',
-    'lector': '👤',
+    'admin':       '👑',
+    'admin_wiki':  '👑',
+    'editor':      '✏️',
+    'editor_wiki': '✏️',
+    'lector':      '👤',
+    'lector_wiki': '👤',
 };
 
 // Opciones del dropdown según rol
@@ -926,7 +926,8 @@ function buildUserDropdown(role) {
     dropdown.innerHTML = '';
 
     // Opciones exclusivas para admin y editor
-    if (role === 'admin' || role === 'editor') {
+    const roleLower = (role || "").toLowerCase();
+    if (roleLower.includes('admin') || roleLower.includes('editor')) {
         const adminItems = [
             { icon: 'fa-solid fa-table-columns', label: 'Dashboard',        url: 'enlace.php?destino=dashboard' },
             { icon: 'fa-brands fa-trello',       label: 'Workspace Trello', url: 'enlace.php?destino=trello' },
@@ -1044,5 +1045,5 @@ function handleLogout() {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
     console.log("Cerrando sesión...");
-    window.location.href = '/wiki-kreative-gen15.5/frontend/index.php';
+    window.location.href = PROJECT_ROOT + '/frontend/index.php';
 }

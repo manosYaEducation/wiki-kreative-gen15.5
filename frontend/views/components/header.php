@@ -6,7 +6,7 @@
             <a href="<?php echo (strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false)
                 ? '/wiki-kreative-gen15.5/frontend/'
                 : '/frontend/'; ?>">
-                <img src="/wiki-kreative-gen15.5/assets/img/kreativenofondo.png" alt="Kreative" class="icon">
+                <img src="<?php echo (strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false) ? '/wiki-kreative-gen15.5/assets/img/kreativenofondo.png' : '/assets/img/kreativenofondo.png'; ?>" alt="Kreative" class="icon">
             </a>
             <span class="nav-title">Bienvenidas/os a la Wiki Kreative</span>
         </div>

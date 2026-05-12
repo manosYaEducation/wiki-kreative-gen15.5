@@ -93,8 +93,9 @@ class TutorialController
 
     private function handleImageUpload($file)
     {
-        // 1. Ruta física absoluta para XAMPP
-        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/wiki-kreative-gen15.5/public/uploads/';
+        $isLocalhost = str_contains($_SERVER['HTTP_HOST'] ?? '', 'localhost') || str_contains($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1');
+        $baseUploadPath = $isLocalhost ? '/wiki-kreative-gen15.5/public/uploads/' : '/public/uploads/';
+        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . $baseUploadPath;
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -116,7 +117,7 @@ class TutorialController
         $destination = $uploadDir . $fileName;
 
         if (move_uploaded_file($file['tmp_name'], $destination)) {
-            return '/wiki-kreative-gen15.5/public/uploads/' . $fileName;
+            return $baseUploadPath . $fileName;
         }
 
         return false;
@@ -127,8 +128,9 @@ class TutorialController
     // =====================================================================
     private function handleFilesUpload($filesInput)
     {
-        // Guardamos adjuntos en subcarpeta separada para orden y permisos.
-        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/wiki-kreative-gen15.5/public/uploads/files/';
+        $isLocalhost = str_contains($_SERVER['HTTP_HOST'] ?? '', 'localhost') || str_contains($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1');
+        $baseFilesUploadPath = $isLocalhost ? '/wiki-kreative-gen15.5/public/uploads/files/' : '/public/uploads/files/';
+        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . $baseFilesUploadPath;
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -187,7 +189,7 @@ class TutorialController
                 return false;
             }
 
-            $paths[] = '/wiki-kreative-gen15.5/public/uploads/files/' . $safeName;
+            $paths[] = $baseFilesUploadPath . $safeName;
             return $paths;
         }
 
@@ -220,7 +222,7 @@ class TutorialController
                 return false;
             }
 
-            $paths[] = '/wiki-kreative-gen15.5/public/uploads/files/' . $safeName;
+            $paths[] = $baseFilesUploadPath . $safeName;
         }
 
         return $paths;

@@ -1,13 +1,6 @@
 Options -MultiViews
 RewriteEngine On
 
-
-
-# El GPS del proyecto: le dice a Apache dónde empieza la raíz virtual
-
-RewriteBase /wiki-kreative-gen15.5/backend/public/
-
-
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ index.php [QSA,L]
+RewriteRule ^ index.php [L]

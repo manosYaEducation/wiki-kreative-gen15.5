@@ -1,12 +1,12 @@
 const loginF = document.querySelector("form");
 
 
-// 1. Detección de entorno (Forzamos la ruta local para asegurar el JWT largo)
-const URL_AUTH = '/wiki-kreative-gen15.5/backend/public/auth/login';
-
 // Ya no necesitamos isLocal para la URL, pero podemos usarlo para logs
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 if (isLocal) console.log("Servidor detectado: Localhost");
+
+// 1. Detección de entorno (Forzamos la ruta local para asegurar el JWT largo o la de prod)
+const URL_AUTH = isLocal ? '/wiki-kreative-gen15.5/backend/public/auth/login' : '/backend/auth/login';
 
 // 2. Configuración bloqueo
 const loginBtn = document.querySelector(".login-button");
@@ -69,47 +69,25 @@ async function cifrarConClavePublica(textoPlano) {
 if (loginF) {
     loginF.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const username = document.querySelector("#username").value;
-        const password = document.querySelector("#password").value;
+        const email    = document.querySelector("#email").value.trim();
+        const password = document.querySelector("#password").value.trim();
 
-        if (!username || !password) {
-            mostrarErrorLogin("Por favor ingresa ambos campos.");
+        if (!email || !password) {
+            mostrarErrorLogin("Por favor ingresa tu correo y contraseña.");
             return;
         }
 
         try {
-            let response;
-            let result = { success: false };
+            const datos = new FormData();
+            datos.append('email', email);
+            datos.append('password', password);
 
-            /*// --- PASO A: INTENTO SISTEMA REAL ---
-            try {
-                const emailCifrado = await cifrarConClavePublica(username);
-                const passwordCifrado = await cifrarConClavePublica(password);
-
-                response = await fetch('https://systemauth.alphadocere.cl/login.php', {
-                    method: "POST",
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: emailCifrado, password: passwordCifrado })
-                });
-                result = await response.json();
-            } catch (e) {
-                console.log("Fallo login real, probando local...");
-            }
-            */
-
-            // --- PASO B: RESPALDO LOCAL (Si falla el real o no hay red) ---
-            if (!result.success && isLocal) {
-                const datosLocal = new FormData();
-                datosLocal.append('username', username);
-                datosLocal.append('password', password);
-
-                response = await fetch(URL_AUTH, {
-                    method: "POST",
-                    body: datosLocal,
-                    credentials: 'include' 
-                });
-                result = await response.json();
-            }
+            const response = await fetch(URL_AUTH, {
+                method: "POST",
+                body: datos,
+                credentials: 'include'
+            });
+            const result = await response.json();
 
                         // --- PASO C: PROCESAR ÉXITO ---
             if (result.success === true) {
@@ -122,7 +100,7 @@ if (loginF) {
                 sessionStorage.setItem('userName', result.user?.username || '');
                 
                 setTimeout(() => {
-                    window.location.href = '/wiki-kreative-gen15.5/frontend/index.php';
+                    window.location.href = isLocal ? '/wiki-kreative-gen15.5/frontend/index.php' : '../index.php';
                 }, 200);
             }else {
                 // MANEJO DE ERROR Y BLOQUEO

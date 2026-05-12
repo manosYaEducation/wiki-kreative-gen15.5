@@ -24,21 +24,21 @@ return [
         'method' => 'createTutorial', 
         'httpMethod' => 'POST',
         'auth' => true,
-        'roles' => ['admin', 'editor']  // 🔒 Solo admin y editor
+        'roles' => ['admin', 'editor', 'admin_wiki', 'editor_wiki']  // 🔒 Solo admin y editor
     ],
     'tutorial/update' => [
         'controller' => TutorialController::class, 
         'method' => 'UpdateTutorial', 
         'httpMethod' => 'POST',
         'auth' => true,
-        'roles' => ['admin', 'editor']  // 🔒 Solo admin y editor
+        'roles' => ['admin', 'editor', 'admin_wiki', 'editor_wiki']  // 🔒 Solo admin y editor
     ],
     'tutorial/delete' => [
         'controller' => TutorialController::class, 
         'method' => 'deleteTutorial', 
         'httpMethod' => 'POST',
         'auth' => true,
-        'roles' => ['admin', 'editor']  // 🔒 Solo admin y editor
+        'roles' => ['admin', 'editor', 'admin_wiki', 'editor_wiki']  // 🔒 Solo admin y editor
     ],
 
     // --- AUTENTICACIÓN ---

@@ -1,12 +1,7 @@
-//verifica si el proyecto esta en Local o Subido
-
-let BASE_PATH = window.location.origin;
-if (window.location.pathname.startsWith('/wiki-kreative')) {
-    BASE_PATH='/wiki-kreative-gen15.5/backend/public';
-} else {
-    BASE_PATH='/backend';
-}
-const API_BASE_URL = BASE_PATH;
+// Detectamos la raíz del proyecto de forma dinámica
+const PROJECT_ROOT = window.location.pathname.split('/frontend')[0];
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE_URL = isLocalhost ? window.location.origin + PROJECT_ROOT + '/backend/public' : '/backend';
 
 // Reusable API call function with improved error handling
 async function makeApiCall(url, method = 'GET', body = null, includeFiles = false) {
@@ -82,10 +77,11 @@ function loadPublicationDetails() {
     // Set image
     const imageElement = document.getElementById('publicationImage');
     if (imageElement) {
-        const basePath = window.location.pathname.startsWith('/wiki-kreative')
-            ? '/wiki-kreative-gen15.5'
-            : '';
-        const imageUrl = publication.image || `${basePath}/assets/img/kreativenofondo.png`;
+        let imageUrl = PROJECT_ROOT + '/assets/img/kreativenofondo.png';
+        if (publication.image && publication.image.trim() !== '') {
+            const imageName = publication.image.split('/').pop();
+            imageUrl = PROJECT_ROOT + `/public/uploads/${imageName}`;
+        }
         imageElement.style.backgroundImage = `url('${imageUrl}')`;
         imageElement.style.backgroundSize = 'cover';
         imageElement.style.backgroundPosition = 'center';
@@ -229,12 +225,11 @@ function loadPublicationDetails() {
         if (Array.isArray(files) && files.length > 0) {
             files.forEach((path) => {
                 const a = document.createElement('a');
-                a.href = path;
+                // Mostrar solo el nombre del archivo
+                const fileName = String(path).split('/').pop() || String(path);
+                a.href = PROJECT_ROOT + `/public/uploads/files/${fileName}`;
                 a.target = '_blank';
                 a.rel = 'noopener noreferrer';
-
-                // Mostrar solo el nombre del archivo (mantiene el mismo comportamiento al hacer clic)
-                const fileName = String(path).split('/').pop() || String(path);
                 a.textContent = fileName;
 
                 const row = document.createElement('div'); // o <li> si usas <ul>
@@ -322,8 +317,8 @@ function toggleTheme() {
     const logo = document.querySelector('.icon');
     if (logo) {
         logo.src = isDarkMode 
-            ? '../assets/img/kreative_white_logo.png' 
-            : '../assets/img/kreativenofondo.png';
+            ? PROJECT_ROOT + '/assets/img/kreative_white_logo.png' 
+            : PROJECT_ROOT + '/assets/img/kreativenofondo.png';
         logo.alt = 'Wiki KREATIVE Logo';
     }
 
@@ -346,8 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const logo = document.querySelector('.icon');
     if (logo) {
         logo.src = currentTheme === 'dark' 
-            ? '../assets/img/kreative_white_logo.png' 
-            : '../assets/img/kreativenofondo.png';
+            ? PROJECT_ROOT + '/assets/img/kreative_white_logo.png' 
+            : PROJECT_ROOT + '/assets/img/kreativenofondo.png';
         logo.alt = 'Wiki KREATIVE Logo';
     }
 
