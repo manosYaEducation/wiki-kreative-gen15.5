@@ -79,7 +79,7 @@ function loadPublicationDetails() {
     if (imageElement) {
         let imageUrl = PROJECT_ROOT + '/assets/img/kreativenofondo.png';
         if (publication.image && publication.image.trim() !== '') {
-            const imageName = publication.image.split('/').pop();
+            const imageName = publication.image.split(/[\\/]/).pop();
             imageUrl = PROJECT_ROOT + `/public/uploads/${imageName}`;
         }
         imageElement.style.backgroundImage = `url('${imageUrl}')`;

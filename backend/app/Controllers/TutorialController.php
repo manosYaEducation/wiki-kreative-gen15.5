@@ -94,8 +94,13 @@ class TutorialController
     private function handleImageUpload($file)
     {
         $isLocalhost = str_contains($_SERVER['HTTP_HOST'] ?? '', 'localhost') || str_contains($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1');
+        
+        // Determinar la raíz del proyecto robustamente usando rutas relativas
+        $projectRoot = dirname(__DIR__, 3); 
+        $uploadDir = $projectRoot . '/public/uploads/';
+        
+        // URL base relativa (para guardar en BD, aunque el frontend solo use el nombre)
         $baseUploadPath = $isLocalhost ? '/wiki-kreative-gen15.5/public/uploads/' : '/public/uploads/';
-        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . $baseUploadPath;
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -129,8 +134,11 @@ class TutorialController
     private function handleFilesUpload($filesInput)
     {
         $isLocalhost = str_contains($_SERVER['HTTP_HOST'] ?? '', 'localhost') || str_contains($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1');
+        
+        $projectRoot = dirname(__DIR__, 3); 
+        $uploadDir = $projectRoot . '/public/uploads/files/';
+        
         $baseFilesUploadPath = $isLocalhost ? '/wiki-kreative-gen15.5/public/uploads/files/' : '/public/uploads/files/';
-        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . $baseFilesUploadPath;
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }

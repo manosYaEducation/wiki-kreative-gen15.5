@@ -46,7 +46,22 @@ composer install
 
 ---
 
-## 4. Configurar el .env
+## 4. Crear un Usuario de Prueba (Auth Local)
+
+Para poder iniciar sesión localmente sin conectar al System Auth de producción, hemos preparado un script interactivo que levanta la base de datos de Auth localmente y te permite crear tu propio usuario.
+
+1. Ve a la carpeta raíz del proyecto (`C:\xampp\htdocs\wiki-kreative-gen15.5`).
+2. Haz doble clic en el archivo **`crear_usuario_local.bat`**.
+3. Se abrirá una consola pidiéndote:
+   - Nombre de usuario
+   - Correo electrónico
+   - Contraseña
+   - El Rol que quieres asignarle (Admin, Editor o Lector)
+4. Sigue las instrucciones en pantalla. ¡Listo! Ya tienes un usuario para ingresar.
+
+---
+
+## 5. Configurar el .env
 
 1. Copia el archivo `.env.example` y renómbralo a `.env`.
 2. Ábrelo y configúralo así:
@@ -61,11 +76,11 @@ DEV_DB_USER=root
 DEV_DB_PASS=
 DEV_DB_PORT=3306
 
-# Auth (remoto, pedir credenciales al líder)
-DEV_AUTH_DB_HOST=___PEDIR_AL_LIDER___
-DEV_AUTH_DB_NAME=___PEDIR_AL_LIDER___
-DEV_AUTH_DB_USER=___PEDIR_AL_LIDER___
-DEV_AUTH_DB_PASS=___PEDIR_AL_LIDER___
+# Auth (local, la que creaste con el script .bat)
+DEV_AUTH_DB_HOST=localhost
+DEV_AUTH_DB_NAME=alphadocere_auth_system
+DEV_AUTH_DB_USER=root
+DEV_AUTH_DB_PASS=
 DEV_AUTH_DB_PORT=3306
 
 WIKI_PROYECTO_ID=3
@@ -73,11 +88,11 @@ JWT_SECRET=WikiSecretKey_Gen15_Version2_2026_Secure
 JWT_EXPIRY=3600
 ```
 
-> ⚠️ **Las credenciales de Auth son privadas.** Pídelas al líder del proyecto directamente.
+> ✅ **Listo.** Ya no necesitas pedir credenciales remotas, usarás los usuarios de prueba.
 
 ---
 
-## 5. Probar
+## 6. Probar
 
 Abre tu navegador y entra a:
 
@@ -87,7 +102,7 @@ http://localhost/wiki-kreative-gen15.5/frontend/index.php
 
 ✅ Si ves la Wiki con publicaciones, ¡está funcionando!
 
-Para probar el login, usa las mismas credenciales del sistema de autenticación del proyecto.
+Para probar el login, utiliza el **correo y contraseña que creaste** en el paso del archivo `.bat`.
 
 ---
 
@@ -97,7 +112,6 @@ Para probar el login, usa las mismas credenciales del sistema de autenticación 
 |---|---|
 | `vendor/autoload.php not found` | Ejecuta `composer install` en la raíz y en `backend/` |
 | `Access denied for user 'root'` | Revisa las credenciales en tu `.env` |
-| `Connection refused` al hacer login | Pide al líder que habilite el acceso remoto a MySQL para tu IP |
 | Las imágenes no cargan | Crea la carpeta `public/uploads/` en la raíz del proyecto |
 | El rol no aparece bien después de login | Cierra sesión, presiona `CTRL+SHIFT+R` y vuelve a entrar |
 

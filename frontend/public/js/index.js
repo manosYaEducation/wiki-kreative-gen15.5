@@ -208,8 +208,8 @@ function createPublicationCard(pub) {
     // 1. Detectamos la raíz del proyecto (ya definida como PROJECT_ROOT)
     const projectRoot = PROJECT_ROOT;
 
-    // 2. Extraemos el nombre limpio de la imagen
-    const imageName = pub.image ? pub.image.split('/').pop() : '';
+    // 2. Extraemos el nombre limpio de la imagen (soporta \ y /)
+    const imageName = pub.image ? pub.image.split(/[\\/]/).pop() : '';
     const cacheBuster = `?t=${Date.now()}`;
 
     // 3. CONSTRUCCIÓN DE RUTA (Ajustada a tu XAMPP)
@@ -445,7 +445,7 @@ function openEditModal(publicationId) {
         deleteImageButton.style.display = 'block';
 
         if (editImagePreview) {
-            const imageName = publication.image.split('/').pop();
+            const imageName = publication.image.split(/[\\/]/).pop();
             const projectRoot = PROJECT_ROOT;
             editImagePreview.src = `${projectRoot}/public/uploads/${imageName}?t=${Date.now()}`;
             editImagePreview.style.display = 'block';
