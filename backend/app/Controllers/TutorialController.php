@@ -57,7 +57,9 @@ class TutorialController
             if ($uploadedFilesPaths === false) {
                 // Si falla adjuntos, limpiamos imagen subida (si aplica) para no dejar basura.
                 if (!empty($imagePath)) {
-                    $fullImage = $_SERVER['DOCUMENT_ROOT'] . $imagePath;
+                    $projectRoot = dirname(__DIR__, 3);
+                    $imageName = basename($imagePath);
+                    $fullImage = $projectRoot . '/public/uploads/' . $imageName;
                     if (file_exists($fullImage)) {
                         unlink($fullImage);
                     }
@@ -78,7 +80,9 @@ class TutorialController
         } else {
             // Limpieza en caso de error (no dejar archivos huérfanos)
             if (!empty($imagePath)) {
-                $fullImage = $_SERVER['DOCUMENT_ROOT'] . $imagePath;
+                $projectRoot = dirname(__DIR__, 3);
+                $imageName = basename($imagePath);
+                $fullImage = $projectRoot . '/public/uploads/' . $imageName;
                 if (file_exists($fullImage)) {
                     unlink($fullImage);
                 }
@@ -105,14 +109,17 @@ class TutorialController
             mkdir($uploadDir, 0755, true);
         }
 
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        $maxFileSize = 5 * 1024 * 1024; // 5MB
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml'];
+        $maxFileSize = 10 * 1024 * 1024; // 10MB
 
         if (!in_array($file['type'], $allowedTypes)) {
+            // Log for debugging
+            error_log("Intento de subida de tipo no permitido: " . $file['type']);
             return false;
         }
 
         if ($file['size'] > $maxFileSize) {
+            error_log("Intento de subida de archivo muy grande: " . $file['size']);
             return false;
         }
 
@@ -156,9 +163,12 @@ class TutorialController
             'image/jpeg',
             'image/png',
             'image/gif',
+            'image/webp',
+            'image/avif',
+            'image/svg+xml',
         ];
 
-        $maxFileSize = 15 * 1024 * 1024; // 15MB por archivo
+        $maxFileSize = 20 * 1024 * 1024; // 20MB por archivo adjunto
 
         // Normalizamos para soportar:
         // - <input name="files"> (un archivo)
@@ -247,7 +257,9 @@ class TutorialController
             if (empty($webPath) || !is_string($webPath)) {
                 continue;
             }
-            $fullPath = $_SERVER['DOCUMENT_ROOT'] . $webPath;
+            $projectRoot = dirname(__DIR__, 3);
+            $fileName = basename($webPath);
+            $fullPath = $projectRoot . '/public/uploads/files/' . $fileName;
             if (file_exists($fullPath)) {
                 unlink($fullPath);
             }
@@ -273,7 +285,9 @@ class TutorialController
         // Verifica si se debe eliminar la imagen actual
         if (!empty($data['deleteImage']) && $data['deleteImage'] === '1') {
             if (!empty($imagePath)) {
-                $fullOldImagePath = $_SERVER['DOCUMENT_ROOT'] . $imagePath;
+                $projectRoot = dirname(__DIR__, 3);
+                $imageName = basename($imagePath);
+                $fullOldImagePath = $projectRoot . '/public/uploads/' . $imageName;
                 if (file_exists($fullOldImagePath)) {
                     unlink($fullOldImagePath);
                 }
@@ -289,7 +303,9 @@ class TutorialController
 
             // Borrar la imagen anterior del servidor
             if (!empty($imagePath)) {
-                $fullOldImagePath = $_SERVER['DOCUMENT_ROOT'] . $imagePath;
+                $projectRoot = dirname(__DIR__, 3);
+                $imageName = basename($imagePath);
+                $fullOldImagePath = $projectRoot . '/public/uploads/' . $imageName;
                 if (file_exists($fullOldImagePath)) {
                     unlink($fullOldImagePath);
                 }
@@ -325,7 +341,9 @@ class TutorialController
         
         // Eliminar archivos del servidor y de la lista
         foreach ($filesToDelete as $filePath) {
-            $fullFilePath = $_SERVER['DOCUMENT_ROOT'] . $filePath;
+            $projectRoot = dirname(__DIR__, 3);
+            $fileName = basename($filePath);
+            $fullFilePath = $projectRoot . '/public/uploads/files/' . $fileName;
             if (file_exists($fullFilePath)) {
                 unlink($fullFilePath);
             }
@@ -383,7 +401,9 @@ class TutorialController
 
         // Intentar eliminar la imagen si existe
         if (!empty($tutorial['image'])) {
-            $imagePath = $_SERVER['DOCUMENT_ROOT'] . $tutorial['image'];
+            $projectRoot = dirname(__DIR__, 3);
+            $imageName = basename($tutorial['image']);
+            $imagePath = $projectRoot . '/public/uploads/' . $imageName;
             if (file_exists($imagePath)) {
                 unlink($imagePath);
             }

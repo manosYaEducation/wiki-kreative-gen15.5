@@ -3,6 +3,23 @@ const PROJECT_ROOT = window.location.pathname.split('/frontend')[0];
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const API_BASE_URL = isLocalhost ? window.location.origin + PROJECT_ROOT + '/backend/public' : '/backend';
 
+// --- ROL DEL USUARIO (leído del JWT en cookie) ---
+let currentUserRole = null;
+
+function getUserRoleFromCookie() {
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('token='));
+    if (!cookie) return null;
+    try {
+        const token = cookie.trim().split('=').slice(1).join('=');
+        const base64Payload = token.split('.')[1];
+        const payload = JSON.parse(atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/')));
+        return payload?.data?.role ?? null;
+    } catch (e) {
+        return null;
+    }
+}
+// --------------------------------------------------
+
 // Reusable API call function with improved error handling
 async function makeApiCall(url, method = 'GET', body = null, includeFiles = false) {
     const headers = {
@@ -351,6 +368,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
     });
 
+    // Leer el rol del usuario desde el JWT
+    currentUserRole = getUserRoleFromCookie();
+    checkSessionStatus();
+
     // Fetch publication data
     fetchPublications();
 });
@@ -358,3 +379,101 @@ document.addEventListener('DOMContentLoaded', () => {
 function showError(message) {
     console.error('Error:', message);
 }
+
+// ========================
+// NAVBAR — Menú de usuario (Sincronizado con index.js)
+// ========================
+
+const ROLE_ICONS = {
+    'admin':       '👑',
+    'admin_wiki':  '👑',
+    'editor':      '✏️',
+    'editor_wiki': '✏️',
+    'lector':      '👤',
+    'lector_wiki': '👤',
+};
+
+function buildUserDropdown(role) {
+    const dropdown = document.getElementById('userDropdown');
+    if (!dropdown) return;
+    dropdown.innerHTML = '';
+
+    const roleLower = (role || "").toLowerCase();
+    if (roleLower.includes('admin') || roleLower.includes('editor')) {
+        const adminItems = [
+            { icon: 'fa-solid fa-table-columns', label: 'Dashboard',        url: 'enlace.php?destino=dashboard' },
+            { icon: 'fa-brands fa-trello',       label: 'Workspace Trello', url: 'enlace.php?destino=trello' },
+            { icon: 'fa-brands fa-wordpress',    label: 'WordPress',        url: 'enlace.php?destino=wordpress' },
+        ];
+        adminItems.forEach(item => {
+            dropdown.innerHTML += `
+                <a href="${item.url}" target="_blank" class="user-dropdown-item">
+                    <i class="${item.icon}"></i> ${item.label}
+                </a>`;
+        });
+        dropdown.innerHTML += `<div class="user-dropdown-divider"></div>`;
+    }
+
+    dropdown.innerHTML += `
+        <div class="user-dropdown-divider"></div>
+        <div class="user-dropdown-item logout-item" onclick="handleLogout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+        </div>`;
+}
+
+function checkSessionStatus() {
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' ||
+                       localStorage.getItem('userLoggedIn') === 'true' ||
+                       sessionStorage.getItem('userId') ||
+                       localStorage.getItem('userId');
+
+    const role    = sessionStorage.getItem('userRole') || localStorage.getItem('userRole') || 'lector';
+    const name    = sessionStorage.getItem('userName') || localStorage.getItem('userName') || 'Usuario';
+
+    const loginBtn    = document.getElementById('loginBtn');
+    const userTrigger = document.getElementById('userTrigger');
+    const roleIcon    = document.getElementById('userRoleIcon');
+    const nameDisplay = document.getElementById('userNameDisplay');
+
+    if (isLoggedIn) {
+        if (loginBtn)    loginBtn.style.display    = 'none';
+        if (userTrigger) userTrigger.style.display = 'flex';
+        if (roleIcon)    roleIcon.textContent       = ROLE_ICONS[role] || '👤';
+        if (nameDisplay) nameDisplay.textContent    = name;
+        buildUserDropdown(role);
+    } else {
+        if (loginBtn)    loginBtn.style.display    = 'flex';
+        if (userTrigger) userTrigger.style.display = 'none';
+    }
+}
+
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    const trigger  = document.getElementById('userTrigger');
+    if (!dropdown) return;
+    dropdown.classList.toggle('show');
+    trigger?.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.user-menu')) {
+        document.getElementById('userDropdown')?.classList.remove('show');
+        document.getElementById('userTrigger')?.classList.remove('open');
+    }
+});
+
+function toggleMobileMenu() {
+    document.getElementById('mobileMenu')?.classList.toggle('open');
+    document.getElementById('hamburger')?.classList.toggle('open');
+}
+
+function handleLogout() {
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    sessionStorage.clear();
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userName');
+    window.location.href = PROJECT_ROOT + '/frontend/index.php';
+}
+
