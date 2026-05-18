@@ -121,8 +121,8 @@ $basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Contenido</label>
-                        <textarea class="form-textarea" id="uploadContent" required></textarea>
+                        <label class="form-label">Contenido *</label>
+                        <textarea class="form-textarea" id="uploadContent" required placeholder="Escribe el contenido aquí. Si deseas agregar un video de YouTube o un enlace externo, pégalo directamente en este campo y el sistema lo detectará automáticamente."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -136,11 +136,6 @@ $basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
                     <div class="form-group">
                         <label class="form-label">Archivo adjunto</label>
                         <input id="uploadFiles" type="file" name="files[]" multiple>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Enlace externo</label>
-                        <input type="url" class="form-input" id="uploadLink" placeholder="https://...">
                     </div>
                 </form>
             </div>
@@ -185,7 +180,7 @@ $basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
 
                     <div class="form-group">
                         <label class="form-label">Contenido *</label>
-                        <textarea class="form-textarea" id="editContent" required placeholder="Escribe el contenido completo del tutorial..."></textarea>
+                        <textarea class="form-textarea" id="editContent" required placeholder="Escribe el contenido aquí. Si deseas agregar un video de YouTube o un enlace externo, pégalo directamente en este campo y el sistema lo detectará automáticamente."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -212,11 +207,6 @@ $basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
                         <label class="form-label">Archivo(s) adjunto(s)</label>
                         <div id="editExistingFiles" class="existing-files-container" style="margin-bottom: 15px;"></div>
                         <input id="editFiles" type="file" name="files[]" multiple>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Enlace externo (opcional)</label>
-                        <input type="url" class="form-input" id="editLink" placeholder="https://...">
                     </div>
                 </form>
             </div>

@@ -263,14 +263,30 @@ function loadPublicationDetails() {
     // ============================================================
 
     // Handle external link section
+    // Prioridad: columna external_link → primera URL no-YouTube del content → primera URL no-YouTube de description
+    let externalLinkValue = publication.external_link || publication.externalLink || '';
+
+    if (!externalLinkValue) {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const sources = [publication.content, publication.description];
+        for (const src of sources) {
+            if (!src) continue;
+            const matches = src.match(urlRegex);
+            if (matches && matches.length > 0) {
+                externalLinkValue = matches[0];
+                break;
+            }
+        }
+    }
+
     const externalLinkSection = document.getElementById('externalLinkSection');
-    if (externalLinkSection && publication.externalLink) {
+    if (externalLinkSection && externalLinkValue) {
         externalLinkSection.style.display = 'block';
         const externalLink = document.getElementById('externalLink');
         const linkUrl = document.getElementById('linkUrl');
         if (externalLink && linkUrl) {
-            externalLink.href = publication.externalLink;
-            linkUrl.textContent = publication.externalLink;
+            externalLink.href = externalLinkValue;
+            linkUrl.textContent = externalLinkValue;
         }
     }
 
@@ -313,10 +329,6 @@ function linkverify(text) {
     if (!text) return '';
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.replace(urlRegex, url => {
-        // No mostrar links de YouTube como texto, se mostrarán embebidos al final
-        if (isYouTubeUrl(url)) {
-            return '';
-        }
         const maxLength = 35;
         const displayUrl = url.length > maxLength ? url.substring(0, maxLength) + '...' : url;
         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${displayUrl}</a>`;

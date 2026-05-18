@@ -508,7 +508,6 @@ async function submitUpload() {
         const area = document.getElementById('uploadCategory').value;
         const content = document.getElementById('uploadContent').value;
         const imageInput = document.getElementById('uploadImage');
-        const link = document.getElementById('uploadLink')?.value || "";
 
         const tags = Array.from(document.querySelectorAll('#uploadTagsDisplay .tag-chip'))
             .map(chip => chip.textContent.replace('×', '').trim());
@@ -521,11 +520,6 @@ async function submitUpload() {
         formData.append('tags', JSON.stringify(tags));
         formData.append('lastEditor', 'user123');
         formData.append('creator', 'user123');
-
-        if (link.trim()) {
-            // no rompe si backend lo ignora
-            formData.append('externalLink', link.trim());
-        }
 
         if (imageInput.files[0]) {
             formData.append('image', imageInput.files[0]);
@@ -569,7 +563,6 @@ async function submitEdit() {
         const area = document.getElementById('editCategory').value;
         const content = document.getElementById('editContent').value;
         const imageInput = document.getElementById('editImage');
-        const link = document.getElementById('editLink')?.value || "";
 
         const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
             .map(chip => chip.textContent.replace('×', '').trim());

@@ -49,6 +49,7 @@ $basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
         <div class="publication-content">
             <div class="content-section" id="content-section">
                 <h2>Contenido Principal</h2>
+            </div>
         </div>
 
         <!-- Tags Section -->
