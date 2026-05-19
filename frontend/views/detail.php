@@ -58,23 +58,8 @@
 
         <!-- Publication Content -->
         <div class="publication-content">
-            <div class="content-section">
+            <div class="content-section" id="content-section">
                 <h2>Contenido Principal</h2>
-                <p>Este es el contenido detallado de la publicación. Aquí se incluiría toda la información relevante, explicaciones paso a paso, ejemplos de código, imágenes adicionales y cualquier otro material educativo relacionado con el tema.</p>
-                
-                <h3>Conceptos Clave</h3>
-                <ul>
-                    <li>Primer concepto importante a destacar</li>
-                    <li>Segundo punto relevante para el aprendizaje</li>
-                    <li>Tercer elemento fundamental del tema</li>
-                    <li>Cuarto aspecto a considerar en la implementación</li>
-                </ul>
-                
-                <p>Continuando con el desarrollo del tema, es importante mencionar que cada publicación puede contener múltiples secciones organizadas de manera lógica para facilitar el aprendizaje y la comprensión del contenido.</p>
-                
-                <h3>Ejemplos Prácticos</h3>
-                <p>En esta sección se incluirían ejemplos prácticos, código fuente, capturas de pantalla o cualquier otro material que ayude a ilustrar los conceptos explicados en la publicación.</p>
-            </div>
         </div>
 
         <!-- Tags Section -->
@@ -88,22 +73,10 @@
         <!-- Attachments Section -->
         <div class="attachments-section" id="attachmentsSection" style="display: none;">
             <h2 class="attachments-title">Archivos Adjuntos</h2>
-            <div class="attachment-item">
-                <div class="attachment-icon">📄</div>
-                <div class="attachment-info">
-                    <div class="attachment-name">Documento de referencia.pdf</div>
-                    <div class="attachment-size">2.5 MB</div>
-                </div>
-                <a href="#" class="download-btn">Descargar</a>
-            </div>
-            <div class="attachment-item">
-                <div class="attachment-icon">💾</div>
-                <div class="attachment-info">
-                    <div class="attachment-name">Código fuente.zip</div>
-                    <div class="attachment-size">1.2 MB</div>
-                </div>
-                <a href="#" class="download-btn">Descargar</a>
-            </div>
+
+            <!-- [NUEVO] Contenedor para que el JS inserte aquí los adjuntos reales -->
+            <div id="attachmentsList"></div>
+
         </div>
 
         <!-- External Link Section -->

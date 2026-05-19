@@ -16,7 +16,7 @@ class Database
         $prefix = strtoupper($environment) . '_DB_';
 
         $host = $_ENV[$prefix . 'HOST'] ?? 'localhost';
-        $db   = $_ENV[$prefix . 'NAME'] ?? 'wiki_kreative';
+        $db   = $_ENV[$prefix . 'NAME'] ?? 'alphadocere_wiki';
         $user = $_ENV[$prefix . 'USER'] ?? 'root';
         $pass = $_ENV[$prefix . 'PASS'] ?? '';
         $port = $_ENV[$prefix . 'PORT'] ?? '3306';
@@ -47,5 +47,17 @@ class Database
     public function getConnection(): PDO
     {
         return $this->conn;
+    }
+    
+    public static function testConnection(): array
+    {
+        try {
+            $db = self::getInstance();
+            $conn = $db->getConnection();
+            $stmt = $conn->query("SELECT 1");
+            return ['success' => true, 'message' => 'Conexión exitosa'];
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
     }
 }

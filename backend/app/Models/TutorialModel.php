@@ -28,51 +28,68 @@ class TutorialModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function createTutorial($data)
-    {
+public function createTutorial($data)
+{
+    try {
+        $tags = isset($data['tags']) && !empty($data['tags']) ? $data['tags'] : [];
+        $files = isset($data['files']) ? $data['files'] : [];
+
         $stmt = $this->conn->prepare("
-            INSERT INTO tutorials (id, title, description, content, image, area, tags, files, lastEditor, creator)
-            VALUES (:id, :title, :description, :content, :image, :area, :tags, :files, :lastEditor, :creator)
+            INSERT INTO tutorials (title, description, content, image, area, tags, files, lastEditor, creator)
+            VALUES (:title, :description, :content, :image, :area, :tags, :files, :lastEditor, :creator)
         ");
+
         return $stmt->execute([
-            ':id' => $data['id'],
             ':title' => $data['title'],
             ':description' => $data['description'],
             ':content' => $data['content'],
-            ':image' => $data['image'],
+            ':image' => $data['image'] ?? null,
             ':area' => $data['area'],
-            ':tags' => json_encode($data['tags']),
-            ':files' => json_encode($data['files']),
+            ':tags' => json_encode(is_array($tags) ? $tags : explode(',', $tags)),
+            ':files' => json_encode($files),
             ':lastEditor' => $data['lastEditor'],
             ':creator' => $data['creator']
         ]);
+    } catch (PDOException $e) {
+        error_log("Error creating tutorial: " . $e->getMessage());
+        return false;
     }
+}
 
-    public function UpdateTutorial($data)
+public function UpdateTutorial($data)
     {
-        $stmt = $this->conn->prepare("
-            UPDATE tutorials SET
-                title = :title,
-                description = :description,
-                content = :content,
-                image = :image,
-                area = :area,
-                tags = :tags,
-                files = :files,
-                lastEditor = :lastEditor
-            WHERE id = :id
-        ");
-        return $stmt->execute([
-            ':title' => $data['title'],
-            ':description' => $data['description'],
-            ':content' => $data['content'],
-            ':image' => $data['image'],
-            ':area' => $data['area'],
-            ':tags' => json_encode($data['tags']),
-            ':files' => json_encode($data['files']),
-            ':lastEditor' => $data['lastEditor'],
-            ':id' => $data['id']
-        ]);
+        try {
+            $tags = isset($data['tags']) && !empty($data['tags']) ? $data['tags'] : [];
+            $files = isset($data['files']) ? $data['files'] : [];
+            
+            $stmt = $this->conn->prepare("
+                UPDATE tutorials SET
+                    title = :title,
+                    description = :description,
+                    content = :content,
+                    image = :image,
+                    area = :area,
+                    tags = :tags,
+                    files = :files,
+                    lastEditor = :lastEditor
+                WHERE id = :id
+            ");
+            
+            return $stmt->execute([
+                ':title' => $data['title'],
+                ':description' => $data['description'],
+                ':content' => $data['content'],
+                ':image' => $data['image'] ?? null, 
+                ':area' => $data['area'],
+                ':tags' => json_encode(is_array($tags) ? $tags : explode(',', $tags)),
+                ':files' => json_encode($files),
+                ':lastEditor' => $data['lastEditor'],
+                ':id' => $data['id']
+            ]);
+        } catch (PDOException $e) {
+            error_log("Error updating tutorial: " . $e->getMessage());
+            return false;
+        }
     }
 
 public function deleteTutorial($id)

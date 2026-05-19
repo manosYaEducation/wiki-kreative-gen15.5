@@ -1,5 +1,19 @@
+RewriteOptions inherit
 Options -MultiViews
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirige la raíz a frontend
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^$ /frontend/ [R=302,L]
+
+# Maneja las rutas de frontend
+RewriteCond %{REQUEST_URI} ^/frontend/(.*)$
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.php [L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^frontend/(.*)$ /frontend/index.php [QSA,L]
+
+# Maneja las rutas de backend
+RewriteCond %{REQUEST_URI} ^/backend/(.*)$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^backend/(.*)$ /backend/public/index.php [QSA,L]

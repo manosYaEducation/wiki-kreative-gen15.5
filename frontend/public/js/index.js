@@ -1,0 +1,857 @@
+//const API_BASE_URL = '/backend';
+//verifica si el proyecto esta en Local o Subido
+let BASE_PATH = window.location.origin;
+if (window.location.pathname.startsWith('/wiki-kreative')) {
+    BASE_PATH='/wiki-kreative-gen15.5/backend/public';
+} else {
+    BASE_PATH='/backend';
+}
+
+const API_BASE_URL = BASE_PATH;
+
+
+let currentPage = 1;
+let currentFilter = 'todas';
+let currentSearchTerm = '';
+let currentTagFilter = '';
+let editingPublicationId = null;
+let deleteImageOnUpdate = false;
+let filesToDeleteOnUpdate = [];
+const itemsPerPage = 9;
+
+// Utility function to remove accents
+function removeAccents(text) {
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// Utility function for API calls
+async function makeApiCall(url, method = 'GET', body = null, includeFiles = false) {
+    const headers = {
+        'Accept': 'application/json',
+    };
+    const options = { method, headers };
+    
+    if (body) {
+        if (includeFiles) {
+            options.body = body; // FormData for file uploads
+        } else {
+            headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(body);
+        }
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${url}`, options);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || `Error del servidor: ${response.status}`);
+        }
+        return data;
+    } catch (error) {
+        showError(error.message);
+        throw error;
+    }
+}
+
+// Fetch all publications
+async function fetchPublications() {
+    try {
+        publications = await makeApiCall('tutorial/getAll');
+        publications = publications.map(pub => ({
+            ...pub,
+            tags: Array.isArray(pub.tags) ? pub.tags : (pub.tags ? JSON.parse(pub.tags) : [])
+        }));
+        renderPublications();
+        updateTagsSection();
+    } catch (error) {
+        console.error('Error fetching al publicaciones desde la Base de Datos, no se esta recibiendo JSON:', error);
+    }
+}
+
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', async function() {
+    // Theme handling
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.toggle('dark-mode', currentTheme === 'dark');
+    const logo = document.querySelector('.icon');
+    if (logo) {
+        logo.src = currentTheme === 'dark' ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
+    }
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    });
+
+    checkSessionStatus();
+
+    await fetchPublications();
+    setupEventListeners();
+});
+
+// Setup event listeners
+function setupEventListeners() {
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        performSearch();
+    });
+
+    window.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            closeUploadModal();
+            closeEditModal();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.card-dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+    });
+
+    setupTagInput('upload');
+    setupTagInput('edit');
+    setupImageUpload('upload');
+    setupImageUpload('edit');
+}
+
+// Render publications
+function renderPublications() {
+    const filteredPublications = getFilteredPublications();
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pagePublications = filteredPublications.slice(startIndex, endIndex);
+    const cardGrid = document.getElementById('cardGrid');
+    cardGrid.innerHTML = '';
+    pagePublications.forEach(pub => {
+        const card = createPublicationCard(pub);
+        cardGrid.appendChild(card);
+    });
+    updatePagination(filteredPublications.length);
+}
+
+// Create publication card
+function createPublicationCard(pub) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    // Ensure tags is an array, default to empty array if null or undefined
+    const tags = Array.isArray(pub.tags) ? pub.tags : [];
+    
+    
+
+    const imageUrl = pub.image && pub.image.trim() !== '' ? pub.image : '../assets/img/kreativenofondo.png';
+
+    
+   
+   
+    // comprobar si el usuario está logueado
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' || 
+                      localStorage.getItem('userLoggedIn') === 'true' ||
+                      sessionStorage.getItem('userId') || 
+                      localStorage.getItem('userId');
+    
+    // mostrar solo si esta logueado para editar y eliminar publiaciones
+    const dropdownMenu = isLoggedIn ? `
+        <div class="card-dropdown">
+            <button class="dropdown-button" onclick="toggleDropdown(event, ${pub.id})">⋮</button>
+            <div class="dropdown-menu" id="dropdown-${pub.id}">
+                <div class="dropdown-item edit" onclick="openEditModal(${pub.id})">✏️ Editar</div>
+                <div class="dropdown-item delete" onclick="deletePublication(${pub.id})">🗑️ Eliminar</div>
+            </div>
+        </div>
+    ` : '';
+
+    //alt="${pub.title}
+    
+    card.innerHTML = `
+    ${dropdownMenu}
+    
+    <div class="card-image">
+        <img src="${imageUrl}" alt="${pub.title}">
+       
+        <span class="card-badge">${getCategoryName(pub.area)}</span>
+    </div>
+
+    <div class="card-body">
+        <h3 class="card-title">${pub.title}</h3>
+        <p class="card-description">${pub.description}</p>
+
+        <div class="card-footer">
+                <div class="card-tags">
+                    ${tags.slice(0, 3).map(tag => `<span class="card-tag">${tag}</span>`).join('')}
+                    ${tags.length > 2 ? `<span class="card-tag">+${tags.length - 2}</span>` : ''}
+                </div>
+                
+        </div>
+        <br>
+        <a href="detail?id=${pub.id}" class="view-more-button">Ver más</a>
+    </div>
+    `;
+
+    
+    return card;
+}
+
+// Get category display name
+function getCategoryName(area) {
+    const names = {
+        'programacion': 'Programación',
+        'diseño': 'Diseño',
+        'gastronomia': 'Gastronomía',
+        'tutorial': 'Tutorial',
+        'marketing': 'Marketing'
+    };
+    return names[area] || area;
+}
+
+// Get filtered publications
+function getFilteredPublications() {
+    return publications.filter(pub => {
+        // Se asegura que pub.tags sea array
+        const tags = Array.isArray(pub.tags)
+            ? pub.tags
+            : (typeof pub.tags === 'string' && pub.tags.trim().startsWith('[')
+                ? JSON.parse(pub.tags)
+                : []);
+
+        const matchesCategory = currentFilter === 'todas' || pub.area === currentFilter;
+        const searchTermNormalized = removeAccents(currentSearchTerm.toLowerCase());
+        const matchesSearch = currentSearchTerm === '' ||
+            //remueven los acentos para comparar
+            removeAccents(pub.title.toLowerCase()).includes(searchTermNormalized) ||
+            removeAccents(pub.description.toLowerCase()).includes(searchTermNormalized) ||
+            tags.some(tag => removeAccents(tag.toLowerCase()).includes(searchTermNormalized));
+        const matchesTag = currentTagFilter === '' || tags.includes(currentTagFilter);
+
+        return matchesCategory && matchesSearch && matchesTag;
+    });
+}
+// Search functionality
+function performSearch() {
+    currentSearchTerm = document.getElementById('searchInput').value;
+    currentPage = 1;
+    renderPublications();
+    updateTagsSection();
+}
+
+// Filter by category
+function filterByCategory(category) {
+    document.querySelectorAll('.filter-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    event.target.classList.add('active');
+    currentFilter = category;
+    currentTagFilter = '';
+    document.querySelectorAll('.tag-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    currentPage = 1;
+    renderPublications();
+    updateTagsSection();
+}
+
+// Filter by tag
+function filterByTag(tag) {
+    document.querySelectorAll('.tag-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    currentTagFilter = currentTagFilter === tag ? '' : tag;
+    if (currentTagFilter === '') {
+        event.target.classList.remove('active');
+    }
+    currentPage = 1;
+    renderPublications();
+    updateTagsSection();
+}
+
+// Update tags section
+function updateTagsSection() {
+    const filteredPublications = getFilteredPublications();
+    const allTags = [...new Set(
+        filteredPublications
+            .flatMap(pub => Array.isArray(pub.tags) ? pub.tags : [])
+            .filter(tag => tag && tag.trim() !== '')
+    )].sort();
+
+    const tagsContainer = document.getElementById('tagsContainer');
+    tagsContainer.innerHTML = '';
+
+    allTags.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.className = `tag-item ${currentTagFilter === tag ? 'active' : ''}`;
+        tagElement.textContent = tag;
+        tagElement.onclick = () => filterByTag(tag);
+        tagsContainer.appendChild(tagElement);
+    });
+}
+
+// Pagination
+function updatePagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
+    const paginationNumbers = document.getElementById('paginationNumbers');
+    paginationNumbers.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+        const pageNumber = document.createElement('span');
+        pageNumber.className = `page-number ${i === currentPage ? 'active' : ''}`;
+        pageNumber.textContent = i;
+        pageNumber.onclick = () => goToPage(i);
+        paginationNumbers.appendChild(pageNumber);
+    }
+}
+
+function goToPage(page) {
+    currentPage = page;
+    renderPublications();
+}
+
+function previousPage() {
+    if (currentPage > 1) {
+        goToPage(currentPage - 1);
+    }
+}
+
+function nextPage() {
+    const filteredPublications = getFilteredPublications();
+    const totalPages = Math.ceil(filteredPublications.length / itemsPerPage);
+    if (currentPage < totalPages) {
+        goToPage(currentPage + 1);
+    }
+}
+
+// Dropdown functionality
+function toggleDropdown(event, publicationId) {
+    event.stopPropagation();
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        if (menu.id !== `dropdown-${publicationId}`) {
+            menu.classList.remove('show');
+        }
+    });
+    const dropdown = document.getElementById(`dropdown-${publicationId}`);
+    dropdown.classList.toggle('show');
+}
+
+// Modal functions
+function openUploadModal() {
+    document.getElementById('uploadModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeUploadModal() {
+    document.getElementById('uploadModal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+    resetUploadForm();
+}
+
+function openEditModal(publicationId) {
+    //const publication = publications.find(p => p.id === publicationId);
+    const publication = publications.find(p => String(p.id) === String(publicationId));
+    
+    if (!publication) return;
+    editingPublicationId = publicationId;
+    deleteImageOnUpdate = false;
+    filesToDeleteOnUpdate = [];
+    document.getElementById('editTitle').value = publication.title;
+    document.getElementById('editDescription').value = publication.description;
+    document.getElementById('editCategory').value = publication.area;
+    document.getElementById('editContent').value = publication.content || '';
+    const tagsDisplay = document.getElementById('editTagsDisplay');
+    tagsDisplay.innerHTML = '';
+    const tags = Array.isArray(publication.tags) ? publication.tags : [];
+    tags.forEach(tag => {
+        addTagToDisplay(tag, 'edit');
+    });
+    
+    // Mostrar botón de eliminar imagen si existe una imagen actual
+    const deleteImageButton = document.getElementById('deleteImageButton');
+    if (publication.image) {
+        deleteImageButton.style.display = 'block';
+    } else {
+        deleteImageButton.style.display = 'none';
+    }
+    
+    // Mostrar archivos existentes
+    displayExistingFiles(publication.files);
+    
+    document.getElementById('editModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.classList.remove('show');
+    });
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+    resetEditForm();
+    editingPublicationId = null;
+}
+
+// Form submission
+async function submitUpload() {
+    const btn = document.getElementById('uploadSubmitBtn');
+
+    return WKFeedback.withButtonLock(btn, async () => {
+        // Validación bonita (toast + borde rojo)
+        const ok = WKFeedback.validateRequired([
+            { id: 'uploadTitle', label: 'Título' },
+            { id: 'uploadDescription', label: 'Descripción' },
+            { id: 'uploadCategory', label: 'Área' },
+            { id: 'uploadContent', label: 'Contenido' },
+        ]);
+        if (!ok) return;
+
+           // ========== CONFIRMACIÓN ANTES DE CREAR ==========
+        const confirmed = await showConfirm('¿Estás seguro de que quieres crear esta publicación?');
+        if (!confirmed) {
+            console.log('Creación cancelada por el usuario.');
+            return;
+        }
+        // =================================================
+
+        const title = document.getElementById('uploadTitle').value;
+        const description = document.getElementById('uploadDescription').value;
+        const area = document.getElementById('uploadCategory').value;
+        const content = document.getElementById('uploadContent').value;
+        const imageInput = document.getElementById('uploadImage');
+        const link = document.getElementById('uploadLink')?.value || "";
+
+        const tags = Array.from(document.querySelectorAll('#uploadTagsDisplay .tag-chip'))
+            .map(chip => chip.textContent.replace('×', '').trim());
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('area', area);
+        formData.append('content', content);
+        formData.append('tags', JSON.stringify(tags));
+        formData.append('lastEditor', 'user123');
+        formData.append('creator', 'user123');
+
+        if (link.trim()) {
+            // no rompe si backend lo ignora
+            formData.append('externalLink', link.trim());
+        }
+
+        if (imageInput.files[0]) {
+            formData.append('image', imageInput.files[0]);
+        }
+
+        const filesInput = document.getElementById('uploadFiles');
+        if (filesInput && filesInput.files && filesInput.files.length > 0) {
+            for (const file of filesInput.files) {
+                formData.append('files[]', file);
+            }
+        }
+
+        try {
+            await makeApiCall('tutorial/create', 'POST', formData, true);
+            showSuccess('Tutorial creado exitosamente');
+            closeUploadModal();
+            await fetchPublications();
+        } catch (error) {
+            console.error('Error creating tutorial:', error);
+            showError(error?.message || 'No se pudo crear el tutorial');
+        }
+    }, { loadingText: "Publicando..." });
+}
+
+
+
+async function submitEdit() {
+    const btn = document.getElementById('editSubmitBtn');
+
+    return WKFeedback.withButtonLock(btn, async () => {
+        const ok = WKFeedback.validateRequired([
+            { id: 'editTitle', label: 'Título' },
+            { id: 'editDescription', label: 'Descripción' },
+            { id: 'editCategory', label: 'Área' },
+            { id: 'editContent', label: 'Contenido' },
+        ]);
+        if (!ok) return;
+
+        const title = document.getElementById('editTitle').value;
+        const description = document.getElementById('editDescription').value;
+        const area = document.getElementById('editCategory').value;
+        const content = document.getElementById('editContent').value;
+        const imageInput = document.getElementById('editImage');
+        const link = document.getElementById('editLink')?.value || "";
+
+        const tags = Array.from(document.querySelectorAll('#editTagsDisplay .tag-chip'))
+            .map(chip => chip.textContent.replace('×', '').trim());
+
+    if (!title || !description || !area || !content) {
+        showError('Por favor completa todos los campos obligatorios.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('id', editingPublicationId);
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('area', area);
+    formData.append('content', content);
+    formData.append('tags', JSON.stringify(tags));
+    formData.append('lastEditor', 'user123');
+    formData.append('deleteImage', deleteImageOnUpdate ? '1' : '0');
+    formData.append('deleteFiles', JSON.stringify(filesToDeleteOnUpdate));
+
+        if (imageInput.files[0]) {
+            formData.append('image', imageInput.files[0]);
+        }
+
+        const filesInput = document.getElementById('editFiles');
+        if (filesInput && filesInput.files && filesInput.files.length > 0) {
+            for (const file of filesInput.files) {
+                formData.append('files[]', file);
+            }
+        }
+
+        try {
+            await makeApiCall('tutorial/update', 'POST', formData, true);
+            showSuccess('Tutorial actualizado exitosamente');
+            closeEditModal();
+            await fetchPublications();
+        } catch (error) {
+            console.error('Error updating tutorial:', error);
+            showError(error?.message || 'No se pudo actualizar el tutorial');
+        }
+    }, { loadingText: "Guardando..." });
+}
+
+
+
+async function deletePublication(publicationId) {
+    if (!publicationId || isNaN(publicationId)) {
+        console.error('Invalid publicationId:', publicationId);
+        showError('Error: ID de publicación no válido');
+        return;
+    }
+
+    const confirmed = await showConfirm('¿Estás seguro de que quieres eliminar esta publicación?');
+    if (!confirmed) {
+        console.log('Eliminación cancelada por el usuario.');
+        return;
+    }
+
+    try {
+        console.log('Enviando petición de eliminación al backend con ID:', publicationId);
+        const formData = new FormData();
+        formData.append('id', publicationId);
+        await makeApiCall('tutorial/delete', 'POST', formData, true);
+        console.log('Publicación eliminada.');
+        showSuccess('Tutorial eliminado exitosamente');
+        await fetchPublications();
+    } catch (error) {
+        console.error('Error deleting tutorial:', error);
+        // Error ya mostrado por makeApiCall()
+    } finally {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+}
+
+// Tag input functionality
+function setupTagInput(modalType) {
+    const tagInput = document.getElementById(`${modalType}TagInput`);
+    tagInput.placeholder = "Enter para guardar";
+    tagInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+            e.preventDefault();
+            addTagToDisplay(this.value.trim(), modalType);
+            this.value = '';
+        }
+    });
+}
+
+function addTagToDisplay(tagText, modalType) {
+    const tagsDisplay = document.getElementById(`${modalType}TagsDisplay`);
+    const existingTags = Array.from(tagsDisplay.querySelectorAll('.tag-chip'))
+        .map(chip => chip.textContent.replace('×', '').trim());
+    if (existingTags.includes(tagText)) {
+        return;
+    }
+    const tagChip = document.createElement('div');
+    tagChip.className = 'tag-chip';
+    tagChip.innerHTML = `
+        ${tagText}
+        <button type="button" class="tag-remove" onclick="this.parentElement.remove()">×</button>
+    `;
+    tagsDisplay.appendChild(tagChip);
+}
+
+// Image upload functionality
+function setupImageUpload(modalType) {
+    const imageInput = document.getElementById(`${modalType}Image`);
+    const imagePreview = document.getElementById(`${modalType}ImagePreview`);
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+//Display de archivos existentes en el modal de edición
+function displayExistingFiles(filesData) {
+    const container = document.getElementById('editExistingFiles');
+    container.innerHTML = '';
+    
+    if (!filesData) {
+        return;
+    }
+    
+    let files = [];
+    if (typeof filesData === 'string') {
+        try {
+            files = JSON.parse(filesData);
+        } catch (e) {
+            files = [];
+        }
+    } else if (Array.isArray(filesData)) {
+        files = filesData;
+    }
+    
+    if (!files || files.length === 0) {
+        return;
+    }
+    
+    const filesList = document.createElement('div');
+    filesList.className = 'existing-files-list';
+    
+    
+    const title = document.createElement('p');
+    
+    title.style.fontWeight = 'bold';
+    title.style.margin = '0 0 10px 0';
+    filesList.appendChild(title);
+    
+    files.forEach((filePath, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.style.display = 'flex';
+        fileItem.style.justifyContent = 'space-between';
+        fileItem.style.alignItems = 'center';
+        fileItem.style.padding = '8px';
+        fileItem.style.backgroundColor = 'white';
+        fileItem.style.marginBottom = '5px';
+        fileItem.style.borderRadius = '3px';
+        fileItem.style.borderLeft = '3px solid #007bff';
+        
+        const nameSpan = document.createElement('span');
+        const fileName = filePath.split('/').pop();
+        nameSpan.textContent = fileName;
+        nameSpan.style.flex = '1';
+        nameSpan.style.wordBreak = 'break-word';
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn btn-sm btn-danger';
+        deleteBtn.textContent = 'Eliminar';
+        deleteBtn.style.marginLeft = '10px';
+        deleteBtn.style.padding = '4px 8px';
+        deleteBtn.style.fontSize = '12px';
+        deleteBtn.onclick = (e) => {
+            e.preventDefault();
+            deleteExistingFile(filePath, index);
+        };
+        
+        fileItem.appendChild(nameSpan);
+        fileItem.appendChild(deleteBtn);
+        filesList.appendChild(fileItem);
+    });
+    
+    container.appendChild(filesList);
+}
+
+//Eliminar archivo existente
+function deleteExistingFile(filePath, index) {
+    if (!filesToDeleteOnUpdate.includes(filePath)) {
+        filesToDeleteOnUpdate.push(filePath);
+    }
+    
+    const fileItems = document.querySelectorAll('.file-item');
+    if (fileItems[index]) {
+        fileItems[index].style.opacity = '0.5';
+        fileItems[index].style.textDecoration = 'line-through';
+    }
+    
+    showSuccess('Archivo marcado para eliminar');
+}
+
+
+function deleteCurrentImage() {
+    deleteImageOnUpdate = true;
+    document.getElementById('editImagePreview').style.display = 'none';
+    document.getElementById('deleteImageButton').style.display = 'none';
+    showSuccess('Imagen marcada para eliminar');
+}
+
+function resetUploadForm() {
+    document.getElementById('uploadForm').reset();
+    document.getElementById('uploadTagsDisplay').innerHTML = '';
+    document.getElementById('uploadImagePreview').style.display = 'none';
+}
+
+function resetEditForm() {
+    document.getElementById('editForm').reset();
+    document.getElementById('editTagsDisplay').innerHTML = '';
+    document.getElementById('editImagePreview').style.display = 'none';
+    document.getElementById('editExistingFiles').innerHTML = '';
+    deleteImageOnUpdate = false;
+    filesToDeleteOnUpdate = [];
+}
+
+// User feedback functions
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    document.body.appendChild(errorDiv);
+    setTimeout(() => errorDiv.remove(), 3000);
+}
+
+function showSuccess(message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.textContent = message;
+    document.body.appendChild(successDiv);
+    setTimeout(() => successDiv.remove(), 3000);
+}
+
+async function showConfirm(message) {
+    return new Promise(resolve => {
+        // Create the modal
+        const confirmModal = document.createElement('div');
+        confirmModal.className = 'modal confirm-modal show'; // Add 'show' class immediately
+        confirmModal.innerHTML = `
+            <div class="modal-content">
+                <p class="confirm-modal-text">${message}</p>
+                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    <button class="btn btn-primary confirm-yes">Sí</button>
+                    <button class="btn btn-secondary confirm-no">No</button>
+                </div>
+            </div>
+        `;
+        
+        // Append to body
+        document.body.appendChild(confirmModal);
+
+        // Ensure modal is visible
+        confirmModal.style.display = 'flex';
+
+        // Add event listeners
+        const yesButton = confirmModal.querySelector('.confirm-yes');
+        const noButton = confirmModal.querySelector('.confirm-no');
+
+        yesButton.onclick = () => {
+            confirmModal.remove();
+            resolve(true);
+        };
+        noButton.onclick = () => {
+            confirmModal.remove();
+            resolve(false);
+        };
+
+        // Allow closing modal by clicking outside
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) {
+                confirmModal.remove();
+                resolve(false);
+            }
+        });
+    });
+}
+
+// Theme toggle function
+function toggleTheme() {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+    const logo = document.querySelector('.icon');
+    if (logo) {
+        logo.src = isDarkMode ? '../assets/img/kreative_white_logo.png' : '../assets/img/kreativenofondo.png';
+    }
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        btn.textContent = isDarkMode ? '☀️' : '🌙';
+    });
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+}
+
+
+// Check if user is logged in and update button accordingly
+function checkSessionStatus() {
+    // Verificar si existe una sesión activa en sessionStorage o localStorage
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' || 
+                      localStorage.getItem('userLoggedIn') === 'true' ||
+                      sessionStorage.getItem('userId') || 
+                      localStorage.getItem('userId');
+    
+    updateUploadButton(isLoggedIn);
+}
+
+// Update upload button text and functionality
+function updateUploadButton(isLoggedIn) {
+    const uploadButtonIcon = document.getElementById('uploadButtonIcon');
+    const uploadButtonText = document.getElementById('uploadButtonText');
+    const logoutButton = document.getElementById('logoutButton');
+    
+    if (isLoggedIn) {
+        uploadButtonIcon.textContent = '📝';
+        uploadButtonText.textContent = 'Subir Publicación';
+        if (logoutButton) {
+            logoutButton.style.display = 'flex';
+        }
+    } else {
+        uploadButtonIcon.textContent = '🔐';
+        uploadButtonText.textContent = 'Iniciar Sesión';
+        if (logoutButton) {
+            logoutButton.style.display = 'none';
+        }
+    }
+}
+
+function handleUploadButtonClick() {
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' ||
+                        localStorage.getItem('userLoggedIn') === 'true' ||
+                        sessionStorage.getItem('userId') ||
+                        localStorage.getItem('userId');
+    
+    if (isLoggedIn) {
+        // Usuario está logueado, abrir modal de subida
+        openUploadModal();
+    } else {
+        // Usuario no está logueado, redirigir a login
+        window.location.href = './views/login.html';
+    }
+}
+
+// Handle logout
+function handleLogout() {
+    // Limpiar todas las sesiones
+    sessionStorage.removeItem('userLoggedIn');
+    sessionStorage.removeItem('userId');
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userId');
+    
+    // Actualizar la interfaz
+    checkSessionStatus();
+    
+    // Recargar las publicaciones para ocultar los menús de edición
+    renderPublications();
+}
+
+// Monitor session changes (useful when user logs in from another tab/window)
+window.addEventListener('storage', function(e) {
+    if (e.key === 'userLoggedIn' || e.key === 'userId') {
+        checkSessionStatus();
+    }
+});
