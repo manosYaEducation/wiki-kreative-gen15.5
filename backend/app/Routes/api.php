@@ -1,13 +1,57 @@
 <?php
 
 use App\Backend\Controllers\TutorialController;
+use App\Backend\Controllers\AuthController;
 
 return [
+    // --- RUTAS PÚBLICAS (Cualquiera las puede ver) ---
+    'tutorial/get' => [
+        'controller' => TutorialController::class, 
+        'method' => 'GetTutorialById', 
+        'httpMethod' => 'GET',
+        'auth' => false // Público
+    ],
+    'tutorial/getAll' => [
+        'controller' => TutorialController::class, 
+        'method' => 'GetTutorials', 
+        'httpMethod' => 'GET',
+        'auth' => false // Público
+    ],
 
-    // Rutas para Tutoriales
-    'tutorial/get' => ['controller' => TutorialController::class, 'method' => 'GetTutorialById', 'httpMethod' => 'GET'],
-    'tutorial/getAll' => ['controller' => TutorialController::class, 'method' => 'GetTutorials', 'httpMethod' => 'GET'],
-    'tutorial/create' => ['controller' => TutorialController::class, 'method' => 'createTutorial', 'httpMethod' => 'POST'],
-    'tutorial/update' => ['controller' => TutorialController::class, 'method' => 'UpdateTutorial', 'httpMethod' => 'POST'],
-    'tutorial/delete' => ['controller' => TutorialController::class, 'method' => 'deleteTutorial', 'httpMethod' => 'POST']
+    // --- RUTAS PROTEGIDAS (Solo con Token JWT / Admin) ---
+    'tutorial/create' => [
+        'controller' => TutorialController::class, 
+        'method' => 'createTutorial', 
+        'httpMethod' => 'POST',
+        'auth' => true,
+        'roles' => ['admin', 'editor', 'admin_wiki', 'editor_wiki']  // 🔒 Solo admin y editor
+    ],
+    'tutorial/update' => [
+        'controller' => TutorialController::class, 
+        'method' => 'UpdateTutorial', 
+        'httpMethod' => 'POST',
+        'auth' => true,
+        'roles' => ['admin', 'editor', 'admin_wiki', 'editor_wiki']  // 🔒 Solo admin y editor
+    ],
+    'tutorial/delete' => [
+        'controller' => TutorialController::class, 
+        'method' => 'deleteTutorial', 
+        'httpMethod' => 'POST',
+        'auth' => true,
+        'roles' => ['admin', 'editor', 'admin_wiki', 'editor_wiki']  // 🔒 Solo admin y editor
+    ],
+
+    // --- AUTENTICACIÓN ---
+    'auth/login' => [
+        'controller' => AuthController::class, 
+        'method' => 'login', 
+        'httpMethod' => 'POST',
+        'auth' => false // Debe ser público para poder entrar
+    ],
+    'auth/logout' => [
+        'controller' => AuthController::class, 
+        'method' => 'logout', 
+        'httpMethod' => 'POST',
+        'auth' => true  // Solo alguien logueado puede desloguearse
+    ]
 ];

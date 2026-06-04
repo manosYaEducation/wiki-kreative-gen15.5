@@ -7,6 +7,7 @@
             "App\\Models\\": "frontend/models/",
             "App\\Backend\\Controllers\\": "backend/app/Controllers/",
             "App\\Backend\\Models\\": "backend/app/Models/",
+            "App\\Backend\\Helpers\\": "backend/app/Helpers/",
             "App\\Backend\\": "backend/app/",
             "App\\Frontend\\": "frontend/"
         }

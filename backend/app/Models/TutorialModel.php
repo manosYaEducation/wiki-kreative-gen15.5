@@ -35,8 +35,8 @@ public function createTutorial($data)
         $files = isset($data['files']) ? $data['files'] : [];
 
         $stmt = $this->conn->prepare("
-            INSERT INTO tutorials (title, description, content, image, area, tags, files, lastEditor, creator)
-            VALUES (:title, :description, :content, :image, :area, :tags, :files, :lastEditor, :creator)
+            INSERT INTO tutorials (title, description, content, image, area, tags, files, lastEditor, creator, external_link)
+            VALUES (:title, :description, :content, :image, :area, :tags, :files, :lastEditor, :creator, :external_link)
         ");
 
         return $stmt->execute([
@@ -48,7 +48,8 @@ public function createTutorial($data)
             ':tags' => json_encode(is_array($tags) ? $tags : explode(',', $tags)),
             ':files' => json_encode($files),
             ':lastEditor' => $data['lastEditor'],
-            ':creator' => $data['creator']
+            ':creator' => $data['creator'],
+            ':external_link' => $data['externalLink'] ?? null
         ]);
     } catch (PDOException $e) {
         error_log("Error creating tutorial: " . $e->getMessage());
@@ -71,7 +72,8 @@ public function UpdateTutorial($data)
                     area = :area,
                     tags = :tags,
                     files = :files,
-                    lastEditor = :lastEditor
+                    lastEditor = :lastEditor,
+                    external_link = :external_link
                 WHERE id = :id
             ");
             
@@ -84,6 +86,7 @@ public function UpdateTutorial($data)
                 ':tags' => json_encode(is_array($tags) ? $tags : explode(',', $tags)),
                 ':files' => json_encode($files),
                 ':lastEditor' => $data['lastEditor'],
+                ':external_link' => $data['externalLink'] ?? null,
                 ':id' => $data['id']
             ]);
         } catch (PDOException $e) {

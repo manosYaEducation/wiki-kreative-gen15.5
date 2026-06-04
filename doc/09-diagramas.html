@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagramas — Wiki KREATIVE Gen 15.5</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0f1117;
+            color: #e2e8f0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #6ee7b7, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 48px;
+            font-size: 0.95rem;
+        }
+
+        .diagram-card {
+            background: #1e2433;
+            border: 1px solid #2d3748;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        }
+
+        .diagram-card h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #6ee7b7;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diagram-card p {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .mermaid {
+            background: #161b27;
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        nav {
+            max-width: 900px;
+            margin: 0 auto 40px auto;
+            background: #1e2433;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 20px 24px;
+        }
+
+        nav h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 8px;
+        }
+
+        nav ul li a {
+            color: #93c5fd;
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        nav ul li a:hover { color: #6ee7b7; }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .badge {
+            display: inline-block;
+            background: #1e3a5f;
+            color: #93c5fd;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 500;
+            vertical-align: middle;
+        }
+
+        footer {
+            text-align: center;
+            color: #475569;
+            font-size: 0.8rem;
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗂️ Diagramas del Sistema</h1>
+        <p class="subtitle">Wiki KREATIVE — Generación 15.5 | Documentación técnica visual</p>
+
+        <!-- Índice -->
+        <nav>
+            <h3>📋 Índice de diagramas</h3>
+            <ul>
+                <li><a href="#arq">① Arquitectura General</a></li>
+                <li><a href="#er">② Entidad-Relación (BD)</a></li>
+                <li><a href="#login">③ Flujo de Login</a></li>
+                <li><a href="#crear">④ Flujo de Crear Publicación</a></li>
+                <li><a href="#detalle">⑤ Flujo de Ver Detalle</a></li>
+                <li><a href="#comp">⑥ Componentes del Frontend</a></li>
+                <li><a href="#roles">⑦ Roles y Permisos</a></li>
+                <li><a href="#deploy">⑧ Despliegue</a></li>
+                <li><a href="#delete">⑨ Flujo de Eliminar</a></li>
+            </ul>
+        </nav>
+
+        <!-- 1. Arquitectura General -->
+        <div id="arq" class="diagram-card">
+            <h2>① Arquitectura General <span class="badge">graph</span></h2>
+            <p>Vista de las capas del sistema y cómo se comunican entre sí: navegador, frontend PHP, backend API y bases de datos.</p>
+            <div class="mermaid">
+graph TB
+    subgraph Cliente["Navegador - Cliente"]
+        B[login.html]
+        C[index.php - Listado]
+        D[detail.php - Detalle]
+    end
+
+    subgraph FrontendServer["Frontend Server - Apache + PHP"]
+        G[frontend/index.php]
+        H[frontend/Router.php]
+        I[frontend/routes.php]
+    end
+
+    subgraph BackendAPI["Backend API - Apache + PHP"]
+        J[backend/public/index.php]
+        K[backend/app/Router.php]
+        L[AuthController.php]
+        M[TutorialController.php]
+        N[TutorialModel.php]
+        O[Database.php - PDO]
+    end
+
+    subgraph Databases["Bases de Datos - MySQL"]
+        P[(alphadocere_wiki)]
+        Q[(alphadocere_auth_system)]
+    end
+
+    R[public/uploads/]
+
+    Cliente -->|HTTP Request| FrontendServer
+    FrontendServer --> G --> H --> I
+    Cliente -->|fetch API| BackendAPI
+    J --> K --> L
+    K --> M --> N --> O
+    O --> P
+    L --> O
+    O --> Q
+    M -->|Subida de archivos| R
+            </div>
+        </div>
+
+        <!-- 2. ER -->
+        <div id="er" class="diagram-card">
+            <h2>② Entidad-Relación — Base de Datos <span class="badge">erDiagram</span></h2>
+            <p>Relación entre las tablas de la BD Wiki y la BD Auth central del sistema Alpha Docere.</p>
+            <div class="mermaid">
+erDiagram
+    TUTORIALS {
+        int id PK
+        varchar title
+        text description
+        longtext content
+        varchar image
+        varchar area
+        json tags
+        json files
+        varchar external_link
+        varchar lastEditor
+        varchar creator
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CLIENTS {
+        int id PK
+        varchar email
+        varchar password
+        varchar nombre
+        varchar status
+    }
+
+    ROLES {
+        int id_rol PK
+        varchar nombre_rol
+    }
+
+    USUARIOS_ROLES_PROYECTOS {
+        int usuario_id FK
+        int rol_id FK
+        int proyecto_id FK
+    }
+
+    PROYECTOS {
+        int id PK
+        varchar nombre
+    }
+
+    CLIENTS ||--o{ USUARIOS_ROLES_PROYECTOS : "tiene roles en"
+    ROLES ||--o{ USUARIOS_ROLES_PROYECTOS : "asignado a"
+    PROYECTOS ||--o{ USUARIOS_ROLES_PROYECTOS : "contiene"
+    CLIENTS ||--o{ TUTORIALS : "crea y edita"
+            </div>
+        </div>
+
+        <!-- 3. Login -->
+        <div id="login" class="diagram-card">
+            <h2>③ Flujo de Autenticación — Login <span class="badge">sequence</span></h2>
+            <p>Proceso completo desde que el usuario ingresa sus credenciales hasta que recibe el token JWT y accede a la Wiki.</p>
+            <div class="mermaid">
+sequenceDiagram
+    actor Usuario
+    participant Browser as Navegador
+    participant Auth as AuthController
+    participant AuthDB as alphadocere_auth_system
+
+    Usuario->>Browser: Ingresa email + contraseña
+    Browser->>Auth: POST /api/auth/login
+    Auth->>AuthDB: SELECT usuario WHERE email = ?
+    AuthDB-->>Auth: Datos del usuario
+
+    alt Usuario no encontrado o password incorrecta
+        Auth-->>Browser: 401 Credenciales incorrectas
+    else Cuenta inactiva
+        Auth-->>Browser: 403 Cuenta no activa
+    else OK - busca rol en la Wiki
+        Auth->>AuthDB: SELECT rol WHERE usuario_id = ? AND proyecto_id = 3
+        AuthDB-->>Auth: Rol del usuario
+        alt Sin rol en la Wiki
+            Auth-->>Browser: 403 Sin acceso a la Wiki
+        else Con rol asignado
+            Auth->>Auth: Genera token JWT firmado
+            Auth-->>Browser: 200 token + datos usuario
+            Browser->>Browser: Guarda cookie token
+            Browser->>Browser: Redirige a /frontend/
+        end
+    end
+            </div>
+        </div>
+
+        <!-- 4. Crear -->
+        <div id="crear" class="diagram-card">
+            <h2>④ Flujo de Crear Publicación <span class="badge">sequence</span></h2>
+            <p>Desde que el editor completa el formulario hasta que la publicación queda guardada en la base de datos.</p>
+            <div class="mermaid">
+sequenceDiagram
+    actor Editor
+    participant Browser as Navegador
+    participant MW as Router + JWT Middleware
+    participant Ctrl as TutorialController
+    participant Model as TutorialModel
+    participant DB as alphadocere_wiki
+    participant FS as Servidor de Archivos
+
+    Editor->>Browser: Completa formulario y hace clic en Publicar
+    Browser->>Browser: Valida campos obligatorios
+    Browser->>MW: POST /api/tutorial/create con FormData
+    MW->>MW: Verifica JWT y rol admin o editor
+
+    alt Token invalido o rol no permitido
+        MW-->>Browser: 401 o 403
+    else Autorizado
+        MW->>Ctrl: createTutorial()
+        opt Hay imagen adjunta
+            Ctrl->>FS: Mueve imagen a public/uploads/
+            FS-->>Ctrl: Ruta guardada
+        end
+        opt Hay archivos adjuntos
+            Ctrl->>FS: Mueve archivos a public/uploads/files/
+            FS-->>Ctrl: Rutas guardadas
+        end
+        Ctrl->>Model: createTutorial con todos los datos
+        Model->>DB: INSERT INTO tutorials
+        DB-->>Model: OK o Error
+        alt Error en INSERT
+            Ctrl->>FS: Elimina archivos subidos
+            Ctrl-->>Browser: 500 Error
+        else Exito
+            Ctrl-->>Browser: 200 Tutorial created successfully
+            Browser->>Browser: Cierra modal y recarga listado
+        end
+    end
+            </div>
+        </div>
+
+        <!-- 5. Detalle -->
+        <div id="detalle" class="diagram-card">
+            <h2>⑤ Flujo de Ver Detalle de Publicación <span class="badge">sequence</span></h2>
+            <p>Proceso de carga de la página de detalle: desde la navegación hasta el renderizado completo del contenido.</p>
+            <div class="mermaid">
+sequenceDiagram
+    actor Visitante
+    participant Browser as Navegador con detail.js
+    participant API as Backend API
+    participant DB as alphadocere_wiki
+
+    Visitante->>Browser: Navega a /frontend/detail?id=79
+    Browser->>Browser: Lee parametro id de la URL
+    Browser->>API: GET /api/tutorial/get?id=79
+    API->>DB: SELECT * FROM tutorials WHERE id = 79
+    DB-->>API: Datos de la publicacion
+    API-->>Browser: JSON con la publicacion
+
+    Browser->>Browser: Rellena DOM con titulo, descripcion, imagen, categoria, fecha
+    Browser->>Browser: linkverify convierte URLs en enlaces clicables
+    Browser->>Browser: extractYouTubeVideos incrusta iframe de YouTube
+    Browser->>Browser: Renderiza tags como pills
+
+    opt Hay archivos adjuntos
+        Browser->>Browser: Renderiza lista de archivos descargables
+    end
+    opt Hay enlace externo o URL en el contenido
+        Browser->>Browser: Muestra tarjeta de Enlace Relacionado
+    end
+            </div>
+        </div>
+
+        <!-- 6. Componentes -->
+        <div id="comp" class="diagram-card">
+            <h2>⑥ Componentes del Frontend <span class="badge">graph</span></h2>
+            <p>Relación entre páginas, scripts JavaScript y componentes PHP reutilizables del frontend.</p>
+            <div class="mermaid">
+graph LR
+    subgraph Paginas["Paginas"]
+        A[index.php - Listado]
+        B[detail.php - Detalle]
+        C[login.html]
+    end
+
+    subgraph Scripts["Scripts JavaScript"]
+        D[index.js]
+        E[detail.js]
+        F[login.js]
+        G[verifyloguin.js]
+        H[wiki-kreative-feedback.js]
+    end
+
+    subgraph Componentes["Componentes PHP"]
+        I[header.php]
+        J[footer-index.php]
+        K[footer.php]
+    end
+
+    API[(API Backend)]
+
+    A -->|usa| D
+    A -->|usa| G
+    A -->|usa| H
+    A -->|incluye| I
+    A -->|incluye| J
+
+    B -->|usa| E
+    B -->|incluye| I
+    B -->|incluye| K
+
+    C -->|usa| F
+
+    D -->|llama API| API
+    E -->|llama API| API
+    F -->|llama API| API
+            </div>
+        </div>
+
+        <!-- 7. Roles -->
+        <div id="roles" class="diagram-card">
+            <h2>⑦ Roles y Permisos <span class="badge">graph</span></h2>
+            <p>Qué puede hacer cada tipo de usuario dentro del sistema según su rol asignado en la BD Auth.</p>
+            <div class="mermaid">
+graph TD
+    A[admin / admin_wiki]
+    B[editor / editor_wiki]
+    C[viewer u otro rol]
+    D[Sin sesion activa]
+
+    P1[Ver publicaciones]
+    P2[Ver detalle completo]
+    P3[Crear publicaciones]
+    P4[Editar publicaciones]
+    P5[Eliminar publicaciones]
+    P6[Solo lectura sin formularios]
+    Login[login.html]
+
+    A --> P1
+    A --> P2
+    A --> P3
+    A --> P4
+    A --> P5
+
+    B --> P1
+    B --> P2
+    B --> P3
+    B --> P4
+
+    C --> P1
+    C --> P2
+    C --> P6
+
+    D -->|Redirige a| Login
+            </div>
+        </div>
+
+        <!-- 8. Despliegue -->
+        <div id="deploy" class="diagram-card">
+            <h2>⑧ Proceso de Despliegue <span class="badge">graph</span></h2>
+            <p>Pasos para pasar cambios desde el entorno local XAMPP al servidor de producción en cPanel.</p>
+            <div class="mermaid">
+graph LR
+    subgraph Local["Entorno Local - XAMPP"]
+        L1[Modificar archivos]
+        L2[Probar en localhost]
+    end
+
+    subgraph ZIP["Empaquetar"]
+        Z1[Crear ZIP con estructura de carpetas]
+        Z2["tar -a -cf cambios.zip -C proyecto frontend backend"]
+    end
+
+    subgraph cPanel["Produccion - cPanel"]
+        P1[Subir ZIP al servidor]
+        P2[Clic derecho - Extract]
+        P3[Archivos reemplazados en sus carpetas]
+        P4[Ctrl+Shift+R en el navegador]
+    end
+
+    L1 --> L2 --> Z1 --> Z2 --> P1 --> P2 --> P3 --> P4
+            </div>
+        </div>
+
+        <!-- 9. Eliminar -->
+        <div id="delete" class="diagram-card">
+            <h2>⑨ Flujo de Eliminar Publicación <span class="badge">sequence</span></h2>
+            <p>Confirmación, eliminación de archivos del servidor y borrado del registro en la base de datos.</p>
+            <div class="mermaid">
+sequenceDiagram
+    actor Admin
+    participant Browser as Navegador con index.js
+    participant API as Backend API
+    participant FS as Sistema de Archivos
+    participant DB as alphadocere_wiki
+
+    Admin->>Browser: Clic en Eliminar en el menu de la tarjeta
+    Browser->>Browser: showConfirm pregunta confirmacion
+
+    alt Usuario cancela
+        Browser->>Browser: No hace nada
+    else Usuario confirma
+        Browser->>API: POST /api/tutorial/delete con id
+        API->>API: Verifica JWT y rol
+        API->>DB: SELECT datos de la publicacion
+        DB-->>API: Imagen y archivos asociados
+
+        opt Tiene imagen de portada
+            API->>FS: unlink imagen de public/uploads/
+        end
+        opt Tiene archivos adjuntos
+            API->>FS: unlink archivos de public/uploads/files/
+        end
+
+        API->>DB: DELETE FROM tutorials WHERE id
+        DB-->>API: OK
+        API-->>Browser: 200 Tutorial deleted successfully
+        Browser->>Browser: Muestra toast de exito
+        Browser->>Browser: Recarga el listado de publicaciones
+    end
+            </div>
+        </div>
+
+        <footer>
+            Wiki KREATIVE Gen 15.5 &mdash; Documentación generada con <a href="https://mermaid.js.org" style="color:#6ee7b7">Mermaid.js</a>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#1e3a5f',
+                primaryTextColor: '#e2e8f0',
+                primaryBorderColor: '#3b82f6',
+                lineColor: '#6ee7b7',
+                secondaryColor: '#1e2d3d',
+                tertiaryColor: '#161b27',
+                background: '#161b27',
+                mainBkg: '#1e2433',
+                nodeBorder: '#3b82f6',
+                clusterBkg: '#1a2235',
+                titleColor: '#6ee7b7',
+                edgeLabelBackground: '#1e2433',
+                actorBkg: '#1e2433',
+                actorBorder: '#3b82f6',
+                actorTextColor: '#e2e8f0',
+                signalColor: '#6ee7b7',
+                signalTextColor: '#e2e8f0',
+                labelBoxBkgColor: '#1e2433',
+                labelBoxBorderColor: '#3b82f6',
+                labelTextColor: '#e2e8f0',
+                loopTextColor: '#e2e8f0',
+                noteBorderColor: '#6ee7b7',
+                noteBkgColor: '#1e3a2f',
+                noteTextColor: '#e2e8f0'
+            },
+            securityLevel: 'loose'
+        });
+    </script>
+</body>
+</html>

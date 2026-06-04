@@ -1,13 +1,24 @@
-//const API_BASE_URL = '/backend/public';
-//verifica si el proyecto esta en Local o Subido
+// Detectamos la raíz del proyecto de forma dinámica
+const PROJECT_ROOT = window.location.pathname.split('/frontend')[0];
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE_URL = isLocalhost ? window.location.origin + PROJECT_ROOT + '/backend/public' : '/backend';
 
-let BASE_PATH = window.location.origin;
-if (window.location.pathname.startsWith('/wiki-kreative')) {
-    BASE_PATH='/wiki-kreative-gen15.5/backend/public';
-} else {
-    BASE_PATH='/backend';
+// --- ROL DEL USUARIO (leído del JWT en cookie) ---
+let currentUserRole = null;
+
+function getUserRoleFromCookie() {
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('token='));
+    if (!cookie) return null;
+    try {
+        const token = cookie.trim().split('=').slice(1).join('=');
+        const base64Payload = token.split('.')[1];
+        const payload = JSON.parse(atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/')));
+        return payload?.data?.role ?? null;
+    } catch (e) {
+        return null;
+    }
 }
-const API_BASE_URL = BASE_PATH;
+// --------------------------------------------------
 
 // Reusable API call function with improved error handling
 async function makeApiCall(url, method = 'GET', body = null, includeFiles = false) {
@@ -83,10 +94,11 @@ function loadPublicationDetails() {
     // Set image
     const imageElement = document.getElementById('publicationImage');
     if (imageElement) {
-        const basePath = window.location.pathname.startsWith('/wiki-kreative')
-            ? '/wiki-kreative-gen15.5'
-            : '';
-        const imageUrl = publication.image || `${basePath}/assets/img/kreativenofondo.png`;
+        let imageUrl = PROJECT_ROOT + '/assets/img/kreativenofondo.png';
+        if (publication.image && publication.image.trim() !== '') {
+            const imageName = publication.image.split(/[\\/]/).pop();
+            imageUrl = PROJECT_ROOT + `/public/uploads/${imageName}`;
+        }
         imageElement.style.backgroundImage = `url('${imageUrl}')`;
         imageElement.style.backgroundSize = 'cover';
         imageElement.style.backgroundPosition = 'center';
@@ -230,12 +242,11 @@ function loadPublicationDetails() {
         if (Array.isArray(files) && files.length > 0) {
             files.forEach((path) => {
                 const a = document.createElement('a');
-                a.href = path;
+                // Mostrar solo el nombre del archivo
+                const fileName = String(path).split('/').pop() || String(path);
+                a.href = PROJECT_ROOT + `/public/uploads/files/${fileName}`;
                 a.target = '_blank';
                 a.rel = 'noopener noreferrer';
-
-                // Mostrar solo el nombre del archivo (mantiene el mismo comportamiento al hacer clic)
-                const fileName = String(path).split('/').pop() || String(path);
                 a.textContent = fileName;
 
                 const row = document.createElement('div'); // o <li> si usas <ul>
@@ -252,14 +263,30 @@ function loadPublicationDetails() {
     // ============================================================
 
     // Handle external link section
+    // Prioridad: columna external_link → primera URL no-YouTube del content → primera URL no-YouTube de description
+    let externalLinkValue = publication.external_link || publication.externalLink || '';
+
+    if (!externalLinkValue) {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const sources = [publication.content, publication.description];
+        for (const src of sources) {
+            if (!src) continue;
+            const matches = src.match(urlRegex);
+            if (matches && matches.length > 0) {
+                externalLinkValue = matches[0];
+                break;
+            }
+        }
+    }
+
     const externalLinkSection = document.getElementById('externalLinkSection');
-    if (externalLinkSection && publication.externalLink) {
+    if (externalLinkSection && externalLinkValue) {
         externalLinkSection.style.display = 'block';
         const externalLink = document.getElementById('externalLink');
         const linkUrl = document.getElementById('linkUrl');
         if (externalLink && linkUrl) {
-            externalLink.href = publication.externalLink;
-            linkUrl.textContent = publication.externalLink;
+            externalLink.href = externalLinkValue;
+            linkUrl.textContent = externalLinkValue;
         }
     }
 
@@ -302,10 +329,6 @@ function linkverify(text) {
     if (!text) return '';
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.replace(urlRegex, url => {
-        // No mostrar links de YouTube como texto, se mostrarán embebidos al final
-        if (isYouTubeUrl(url)) {
-            return '';
-        }
         const maxLength = 35;
         const displayUrl = url.length > maxLength ? url.substring(0, maxLength) + '...' : url;
         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${displayUrl}</a>`;
@@ -323,8 +346,8 @@ function toggleTheme() {
     const logo = document.querySelector('.icon');
     if (logo) {
         logo.src = isDarkMode 
-            ? '../assets/img/kreative_white_logo.png' 
-            : '../assets/img/kreativenofondo.png';
+            ? PROJECT_ROOT + '/assets/img/kreative_white_logo.png' 
+            : PROJECT_ROOT + '/assets/img/kreativenofondo.png';
         logo.alt = 'Wiki KREATIVE Logo';
     }
 
@@ -347,8 +370,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const logo = document.querySelector('.icon');
     if (logo) {
         logo.src = currentTheme === 'dark' 
-            ? '../assets/img/kreative_white_logo.png' 
-            : '../assets/img/kreativenofondo.png';
+            ? PROJECT_ROOT + '/assets/img/kreative_white_logo.png' 
+            : PROJECT_ROOT + '/assets/img/kreativenofondo.png';
         logo.alt = 'Wiki KREATIVE Logo';
     }
 
@@ -357,6 +380,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
     });
 
+    // Leer el rol del usuario desde el JWT
+    currentUserRole = getUserRoleFromCookie();
+    checkSessionStatus();
+
     // Fetch publication data
     fetchPublications();
 });
@@ -364,3 +391,101 @@ document.addEventListener('DOMContentLoaded', () => {
 function showError(message) {
     console.error('Error:', message);
 }
+
+// ========================
+// NAVBAR — Menú de usuario (Sincronizado con index.js)
+// ========================
+
+const ROLE_ICONS = {
+    'admin':       '👑',
+    'admin_wiki':  '👑',
+    'editor':      '✏️',
+    'editor_wiki': '✏️',
+    'lector':      '👤',
+    'lector_wiki': '👤',
+};
+
+function buildUserDropdown(role) {
+    const dropdown = document.getElementById('userDropdown');
+    if (!dropdown) return;
+    dropdown.innerHTML = '';
+
+    const roleLower = (role || "").toLowerCase();
+    if (roleLower.includes('admin') || roleLower.includes('editor')) {
+        const adminItems = [
+            { icon: 'fa-solid fa-table-columns', label: 'Dashboard',        url: 'enlace.php?destino=dashboard' },
+            { icon: 'fa-brands fa-trello',       label: 'Workspace Trello', url: 'enlace.php?destino=trello' },
+            { icon: 'fa-brands fa-wordpress',    label: 'WordPress',        url: 'enlace.php?destino=wordpress' },
+        ];
+        adminItems.forEach(item => {
+            dropdown.innerHTML += `
+                <a href="${item.url}" target="_blank" class="user-dropdown-item">
+                    <i class="${item.icon}"></i> ${item.label}
+                </a>`;
+        });
+        dropdown.innerHTML += `<div class="user-dropdown-divider"></div>`;
+    }
+
+    dropdown.innerHTML += `
+        <div class="user-dropdown-divider"></div>
+        <div class="user-dropdown-item logout-item" onclick="handleLogout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+        </div>`;
+}
+
+function checkSessionStatus() {
+    const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true' ||
+                       localStorage.getItem('userLoggedIn') === 'true' ||
+                       sessionStorage.getItem('userId') ||
+                       localStorage.getItem('userId');
+
+    const role    = sessionStorage.getItem('userRole') || localStorage.getItem('userRole') || 'lector';
+    const name    = sessionStorage.getItem('userName') || localStorage.getItem('userName') || 'Usuario';
+
+    const loginBtn    = document.getElementById('loginBtn');
+    const userTrigger = document.getElementById('userTrigger');
+    const roleIcon    = document.getElementById('userRoleIcon');
+    const nameDisplay = document.getElementById('userNameDisplay');
+
+    if (isLoggedIn) {
+        if (loginBtn)    loginBtn.style.display    = 'none';
+        if (userTrigger) userTrigger.style.display = 'flex';
+        if (roleIcon)    roleIcon.textContent       = ROLE_ICONS[role] || '👤';
+        if (nameDisplay) nameDisplay.textContent    = name;
+        buildUserDropdown(role);
+    } else {
+        if (loginBtn)    loginBtn.style.display    = 'flex';
+        if (userTrigger) userTrigger.style.display = 'none';
+    }
+}
+
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    const trigger  = document.getElementById('userTrigger');
+    if (!dropdown) return;
+    dropdown.classList.toggle('show');
+    trigger?.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.user-menu')) {
+        document.getElementById('userDropdown')?.classList.remove('show');
+        document.getElementById('userTrigger')?.classList.remove('open');
+    }
+});
+
+function toggleMobileMenu() {
+    document.getElementById('mobileMenu')?.classList.toggle('open');
+    document.getElementById('hamburger')?.classList.toggle('open');
+}
+
+function handleLogout() {
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    sessionStorage.clear();
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userName');
+    window.location.href = PROJECT_ROOT + '/frontend/index.php';
+}
+

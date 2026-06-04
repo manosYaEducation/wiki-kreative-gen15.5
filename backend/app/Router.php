@@ -2,6 +2,9 @@
 
 namespace App\Backend;
 
+// Importamos el guardia
+use App\Backend\Middleware\AuthMiddleware;
+
 class Router
 {
     private $routes;
@@ -28,6 +31,31 @@ class Router
 
         foreach ($this->routes as $path => $handler) {
             if ($path === $route && $handler['httpMethod'] === $requestMethod) {
+                
+                // --- NUEVO: LÓGICA DE SEGURIDAD (Middleware) ---
+                if (isset($handler['auth']) && $handler['auth'] === true) {
+                    $middleware = new AuthMiddleware();
+                    // El guardia revisa el token. Si falla, él mismo corta la ejecución.
+                    $userData = $middleware->checkToken();
+
+                    // --- VERIFICACIÓN DE ROL ---
+                    // Si la ruta define roles permitidos, el usuario debe tener uno de ellos.
+                    if (isset($handler['roles']) && is_array($handler['roles'])) {
+                        $userRole = $userData->role ?? '';
+                        if (!in_array($userRole, $handler['roles'])) {
+                            http_response_code(403);
+                            header('Content-Type: application/json');
+                            echo json_encode([
+                                'success' => false,
+                                'message' => 'No tienes permisos para realizar esta acción.'
+                            ]);
+                            exit;
+                        }
+                    }
+                    // ---------------------------
+                }
+                // -----------------------------------------------
+
                 $controllerClass = $handler['controller'];
                 $methodName = $handler['method'];
 
@@ -37,7 +65,7 @@ class Router
                         $controller->$methodName();
                         return;
                     } else {
-                        $this->sendJsonResponse(['success' => false, 'message' => 'Método no encontrado en el controlador.'], 404);
+                        $this->sendJsonResponse(['success' => false, 'message' => 'Método no encontrado.'], 404);
                     }
                 } else {
                     $this->sendJsonResponse(['success' => false, 'message' => 'Controlador no encontrado.'], 404);
@@ -45,7 +73,7 @@ class Router
             }
         }
 
-        $this->sendJsonResponse(['success' => false, 'message' => 'Ruta no encontrada o método no permitido.'], 404);
+        $this->sendJsonResponse(['success' => false, 'message' => 'Ruta no encontrada.'], 404);
     }
 
     private function sendJsonResponse($data, $statusCode = 200)

@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+<?php
+$isLocal = strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false;
+$basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
+?>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Equipo Profesional Gen10 Alpha Docere</title>
-    <link rel="icon" href="../assets/img/letra-k (1).png" type="image/x-icon">
-    <link href="../frontend/css/admin/index-admin.css" rel="stylesheet" />
-    <link rel="stylesheet" href="public/css/admin/index-admin.css">
-	<link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative.css">
+    <link rel="icon" href="<?= $basePath ?>/assets/img/letra-k.png" type="image/x-icon">
+    <!--<link href="../frontend/css/admin/index-admin.css" rel="stylesheet" />-->
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/admin/index-admin.css">
+	<link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/wiki-kreative/wiki-kreative.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" href="./assets/img/letra-k (1).png" type="image/x-icon">
@@ -18,22 +22,7 @@
 </head>
 <body class="detail-page">
     <?php require_once("components/header.php"); ?>
-    <section class="ambientes-section" id="enlaces">
-       
-            <div class="enlaces">
-                <ul class="link-buttons">
-                    <li><a class="button-social" href="enlace.php?destino=discord" target="_blank"><i class="fab fa-discord"></i> Discord</a></li>
-                    <li><a class="button-social" href="enlace.php?destino=dashboard" target="_blank"><i class="fa-solid fa-table"></i> Dashboard</a></li>
-                    <li><a class="button-social" href="enlace.php?destino=trello" target="_blank"><i class="fa-brands fa-trello"></i> Workspace Trello</a></li>
-                    <li><a class="button-social" href="enlace.php?destino=whatsapp" target="_blank"><i class="fa-brands fa-whatsapp"></i> Whatsapp</a></li>
-                    <li><a class="button-social" href="enlace.php?destino=wordpress" target="_blank"><i class="fa-brands fa-wordpress"></i> Wordpress</a></li>
-                    <li><a class="button-social" href="enlace.php?destino=tienda" target="_blank"><i class="fa-solid fa-shop"></i> Tienda</a></li>
-                </ul>
-            </div>
-    </section>
 
-
-    <!-- Main Content -->
     <main class="main-content">
         <!-- Publication Header -->
         <div class="publication-header">
@@ -60,6 +49,7 @@
         <div class="publication-content">
             <div class="content-section" id="content-section">
                 <h2>Contenido Principal</h2>
+            </div>
         </div>
 
         <!-- Tags Section -->
@@ -92,6 +82,6 @@
         </div>
     </main>
 
-	<script src="public/js/detail.js"></script>
+	<script src="<?= $basePath ?>/frontend/public/js/detail.js"></script>
 </body>
 </html>

@@ -1,9 +1,11 @@
-<footer class="footer">
+<footer class="footer" id="footer">
     <div class="footer-container">
+
         <div class="footer-brand">
-        <img src="/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png" alt="Logo" class="footer-logo">
+            <img src="<?php echo (strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false) ? '/wiki-kreative-gen15.5/assets/img/kreative_white_logo.png' : '/assets/img/kreative_white_logo.png'; ?>" alt="Logo" class="footer-logo">
         </div>
-         <div class="footer-section">
+
+        <div class="footer-section">
             <h3>Contacto</h3>
             <ul class="contact-info">
                 <li class="contacto-nombre">Mauro Rojas</li>
@@ -14,7 +16,7 @@
                 </li>
                 <li>
                     <i class="fab fa-whatsapp"></i>
-                    <a href="https://wa.me/945429495" target="_blank">+56 945429495</a>
+                    <a href="https://wa.me/945429495" target="_blank">WhatsApp</a>
                 </li>
             </ul>
         </div>
@@ -30,12 +32,24 @@
                 </li>
             </ul>
         </div>
+
+        <div class="footer-section">
+            <h3>Comunidad</h3>
+            <ul class="social-links">
+                <li>
+                    <a href="https://discord.gg/kreative" target="_blank" class="social-link discord">
+                        <i class="fab fa-discord"></i>
+                        <span>Discord</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
     </div>
 
     <div class="footer-bottom">
         <div class="copyright-container">
-            
-            <p class="copyright">Copyright 2025 Kreative v. Gen 16 Inicial 1.2| Todos los derechos reservados por empresa Kreative</p>
+            <p class="copyright">Copyright 2025 Kreative v. Gen 16 Inicial 1.2 | Todos los derechos reservados por empresa Kreative</p>
         </div>
     </div>
 </footer>

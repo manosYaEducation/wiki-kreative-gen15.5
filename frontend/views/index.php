@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
 
+<?php
+// Detectar automáticamente si estamos en XAMPP local o en producción
+$isLocal = strpos($_SERVER['REQUEST_URI'], '/wiki-kreative-gen15.5/') !== false;
+$basePath = $isLocal ? '/wiki-kreative-gen15.5' : '';
+?>
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Equipo Profesional Gen10 Alpha Docere</title>
 
-    <link rel="icon" href="../assets/img/letra-k (1).png" type="image/x-icon">
-    <link href="../public/css/admin/index-admin.css" rel="stylesheet" />
-    <link rel="stylesheet" href="public/css/admin/index-admin.css">
-
-    <!-- CSS base -->
-    <link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative.css">
-    <!-- CSS feedback (toasts + validación) -->
-    <link rel="stylesheet" href="public/css/wiki-kreative/wiki-kreative-feedback.css">
-    <!-- CSS footer -->
-    <link rel="stylesheet" href="public/css/footer/footer.css">
+    <link rel="icon" href="<?= $basePath ?>/assets/img/letra-k.png" type="image/png">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/admin/index-admin.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/admin/index-admin.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/wiki-kreative/wiki-kreative.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/wiki-kreative/wiki-kreative-feedback.css">
+    <link rel="stylesheet" href="<?= $basePath ?>/frontend/public/css/footer/footer.css">
     
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="icon" href="./assets/img/letra-k (1).png" type="image/x-icon">
+    <link rel="icon" href="/assets/img/letra-k.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <link
         href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
         rel="stylesheet">
@@ -29,25 +32,6 @@
 
 <body>
     <?php require_once("components/header.php"); ?>
-
-    <section class="ambientes-section" id="enlaces">
-        <div class="enlaces">
-            <ul class="link-buttons">
-                <li><a class="button-social" href="enlace.php?destino=discord" target="_blank"><i class="fab fa-discord"></i> Discord</a></li>
-                <li><a class="button-social" href="enlace.php?destino=dashboard" target="_blank"><i class="fa-solid fa-table"></i> Dashboard</a></li>
-                <li><a class="button-social" href="enlace.php?destino=trello" target="_blank"><i class="fa-brands fa-trello"></i> Workspace Trello</a></li>
-                <li><a class="button-social" href="enlace.php?destino=whatsapp" target="_blank"><i class="fa-brands fa-whatsapp"></i> Whatsapp</a></li>
-                <li><a class="button-social" href="enlace.php?destino=wordpress" target="_blank"><i class="fa-brands fa-wordpress"></i> Wordpress</a></li>
-                <li><a class="button-social" href="enlace.php?destino=tienda" target="_blank"><i class="fa-solid fa-shop"></i> Tienda</a></li>
-            </ul>
-        </div>
-    </section>
-
-    <section class="search-section">
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Buscar publicaciones..." id="searchInput">
-        </div>
-    </section>
 
     <main class="main-content">
         <aside class="sidebar">
@@ -74,13 +58,9 @@
                 <h1>Wiki KREATIVE</h1>
 
                 <div class="header-buttons">
-                    <button class="upload-button" id="uploadButton" onclick="handleUploadButtonClick()">
+                    <button class="upload-button" id="uploadButton" onclick="handleUploadButtonClick()" style="display:none;">
                         <span id="uploadButtonIcon">📝</span>
                         <span id="uploadButtonText">Subir Publicación</span>
-                    </button>
-                    <button class="logout-button" id="logoutButton" onclick="handleLogout()" style="display: none;">
-                        <span>🚪</span>
-                        <span>Cerrar Sesión</span>
                     </button>
                 </div>
             </div>
@@ -141,8 +121,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Contenido</label>
-                        <textarea class="form-textarea" id="uploadContent" required></textarea>
+                        <label class="form-label">Contenido *</label>
+                        <textarea class="form-textarea" id="uploadContent" required placeholder="Escribe el contenido aquí. Si deseas agregar un video de YouTube o un enlace externo, pégalo directamente en este campo y el sistema lo detectará automáticamente."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -156,11 +136,6 @@
                     <div class="form-group">
                         <label class="form-label">Archivo adjunto</label>
                         <input id="uploadFiles" type="file" name="files[]" multiple>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Enlace externo</label>
-                        <input type="url" class="form-input" id="uploadLink" placeholder="https://...">
                     </div>
                 </form>
             </div>
@@ -205,7 +180,7 @@
 
                     <div class="form-group">
                         <label class="form-label">Contenido *</label>
-                        <textarea class="form-textarea" id="editContent" required placeholder="Escribe el contenido completo del tutorial..."></textarea>
+                        <textarea class="form-textarea" id="editContent" required placeholder="Escribe el contenido aquí. Si deseas agregar un video de YouTube o un enlace externo, pégalo directamente en este campo y el sistema lo detectará automáticamente."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -233,11 +208,6 @@
                         <div id="editExistingFiles" class="existing-files-container" style="margin-bottom: 15px;"></div>
                         <input id="editFiles" type="file" name="files[]" multiple>
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Enlace externo (opcional)</label>
-                        <input type="url" class="form-input" id="editLink" placeholder="https://...">
-                    </div>
                 </form>
             </div>
 
@@ -247,9 +217,8 @@
             </div>
         </div>
     </div>
-    <script src="public/js/wiki-kreative-feedback.js"></script>
-
-    <script src="public/js/index.js"></script>
+    <script src="<?= $basePath ?>/frontend/public/js/index.js"></script>
+    <script src="<?= $basePath ?>/frontend/public/js/wiki-kreative-feedback.js"></script>
     <?php require_once("components/footer-index.php"); ?>
     
 </body>
