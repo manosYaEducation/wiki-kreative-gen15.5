@@ -2,7 +2,10 @@
 .env
 .env.backup
 
-
+# Dependencias Composer
 /vendor/
+/backend/vendor/
+
+# Uploads
 /public/uploads
 
